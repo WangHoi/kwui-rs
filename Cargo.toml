@@ -1,0 +1,28 @@
+[package]
+name = "kwui"
+version = "0.1.0"
+edition = "2021"
+description = "A GUI library with JSX/CSS support"
+# publish = ["crates-io"]
+license = "LGPL-3.0-or-later"
+keywords = ["graphics", "gui", "widgets", "jsx", "quickjs"]
+categories = ["gui", "api-bindings"]
+repository = "https://gitee.com/wanghoi/kwui-rs"
+readme = "README.md"
+
+[lib]
+name = "kwui"
+path = "src/lib.rs"
+
+[dependencies]
+log = "0.4.20"
+
+[dependencies.kwui-sys]
+path = "kwui-sys"
+version = "0.1.0"
+
+[[example]]
+name = "tour"
+
+[dev-dependencies]
+windows_dpi = "0.3.0"

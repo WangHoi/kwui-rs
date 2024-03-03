@@ -1,0 +1,3 @@
+[submodule "kwui-sys/deps/kwui"]
+	path = kwui-sys/deps/kwui
+	url = git@gitee.com:wanghoi/kwui.git
