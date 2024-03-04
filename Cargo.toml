@@ -24,5 +24,8 @@ version = "0.1.0"
 [[example]]
 name = "tour"
 
+[[example]]
+name = "installer"
+
 [dev-dependencies]
 windows_dpi = "0.3.0"

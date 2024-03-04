@@ -5,3 +5,4 @@ mod script_value;
 
 pub use application::*;
 pub use script_engine::*;
+pub use script_value::*;

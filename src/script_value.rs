@@ -1,6 +1,6 @@
-use std::ffi::CStr;
-
 use kwui_sys::*;
+use std::ffi::{CStr, CString};
+use std::os::raw::{c_int, c_void};
 
 pub struct ScriptValue {
     inner: *mut kwui_ScriptValue,
@@ -15,6 +15,148 @@ impl ScriptValue {
             Err(_) => Self::default(),
         }
     }
+    pub fn new_null() -> Self {
+        let inner = unsafe { kwui_ScriptValue_newNull() };
+        Self { inner }
+    }
+    pub fn new_bool(v: bool) -> Self {
+        let inner = unsafe { kwui_ScriptValue_newBool(v) };
+        Self { inner }
+    }
+    pub fn new_int(v: i32) -> Self {
+        let inner = unsafe { kwui_ScriptValue_newInt(v) };
+        Self { inner }
+    }
+    pub fn new_double(v: f64) -> Self {
+        let inner = unsafe { kwui_ScriptValue_newDouble(v) };
+        Self { inner }
+    }
+    pub fn new_string(v: &str) -> Self {
+        let inner = unsafe { kwui_ScriptValue_newString(v.as_ptr() as _, v.len()) };
+        Self { inner }
+    }
+    pub fn new_array() -> Self {
+        let inner = unsafe { kwui_ScriptValue_newArray() };
+        Self { inner }
+    }
+    pub fn new_object() -> Self {
+        let inner = unsafe { kwui_ScriptValue_newObject() };
+        Self { inner }
+    }
+    pub fn get_value_by_index(&self, idx: usize) -> ScriptValue {
+        let inner = unsafe { kwui_ScriptValue_get_by_index(self.inner, idx as _) };
+        Self::from_inner(inner)
+    }
+    pub fn get_by_index<T: FromScriptValue + Default>(&self, idx: usize) -> T {
+        T::from_script_value(&self.get_value_by_index(idx)).unwrap_or(T::default())
+    }
+    pub fn try_get_by_index<T: FromScriptValue>(&self, idx: usize) -> Result<T, ()> {
+        T::from_script_value(&self.get_value_by_index(idx))
+    }
+    pub fn set_value_by_index(&self, idx: usize, v: ScriptValue) {
+        unsafe { kwui_ScriptValue_set_by_index(self.inner, idx as _, v.inner) };
+    }
+    pub fn set_by_index(&mut self, idx: usize, v: impl IntoScriptValue) {
+        let v = ScriptValue::from(v);
+        unsafe { kwui_ScriptValue_set_by_index(self.inner, idx as _, v.inner) };
+        std::mem::forget(v);
+    }
+    pub fn get_value_by_str(&self, key: &str) -> ScriptValue {
+        let key = CString::new(key).unwrap_or_default();
+        let inner = unsafe { kwui_ScriptValue_get_by_str(self.inner, key.as_ptr()) };
+        Self::from_inner(inner)
+    }
+    pub fn get_by_str<T: FromScriptValue + Default>(&self, key: &str) -> T {
+        T::from_script_value(&self.get_value_by_str(key)).unwrap_or_default()
+    }
+    pub fn try_get_by_str<T: FromScriptValue>(&self, key: &str) -> Result<T, ()> {
+        T::from_script_value(&self.get_value_by_str(key))
+    }
+    pub fn set_by_str(&mut self, key: &str, v: impl IntoScriptValue) {
+        let key = CString::new(key).unwrap_or_default();
+        let v = ScriptValue::from(v);
+        unsafe { kwui_ScriptValue_set_by_str(self.inner, key.as_ptr(), v.inner) };
+        std::mem::forget(v);
+    }
+    pub fn is_null(&self) -> bool {
+        unsafe { kwui_ScriptValue_is_null(self.inner) }
+    }
+    pub fn is_bool(&self) -> bool {
+        unsafe { kwui_ScriptValue_is_bool(self.inner) }
+    }
+    pub fn is_number(&self) -> bool {
+        unsafe { kwui_ScriptValue_is_number(self.inner) }
+    }
+    pub fn is_string(&self) -> bool {
+        unsafe { kwui_ScriptValue_is_string(self.inner) }
+    }
+    pub fn is_array(&self) -> bool {
+        unsafe { kwui_ScriptValue_is_array(self.inner) }
+    }
+    pub fn is_object(&self) -> bool {
+        unsafe { kwui_ScriptValue_is_object(self.inner) }
+    }
+    pub fn to_bool(&self) -> bool {
+        unsafe { kwui_ScriptValue_to_bool(self.inner) }
+    }
+    pub fn to_double(&self) -> f64 {
+        unsafe { kwui_ScriptValue_to_double(self.inner) }
+    }
+    pub fn to_int(&self) -> i32 {
+        unsafe { kwui_ScriptValue_to_int(self.inner) }
+    }
+    pub fn to_string(&self) -> String {
+        let buf = unsafe {
+            let mut len = 0;
+            let buf = kwui_ScriptValue_to_string(self.inner, &mut len);
+            std::slice::from_raw_parts(buf as *const u8, len)
+        };
+        String::from_utf8_lossy(buf).to_string()
+    }
+    pub fn length(&self) -> usize {
+        unsafe { kwui_ScriptValue_length(self.inner) }
+    }
+    pub fn visit_array<F: FnMut(usize, &ScriptValue)>(&self, callback: F) {
+        //let callback = Box::into_raw(Box::new(callback)) as *mut c_void;
+        unsafe extern "C" fn visit_array_callback<F: FnMut(usize, &ScriptValue)>(
+            index: c_int,
+            val: *const kwui_ScriptValue,
+            udata: *mut c_void,
+        ) {
+            let val = ScriptValue::from_inner(val as _);
+            (*(udata as *mut F))(index as _, &val);
+            std::mem::forget(val);
+        }
+        unsafe {
+            kwui_ScriptValue_visitArray(
+                self.inner,
+                Some(visit_array_callback::<F>),
+                &callback as *const F as _,
+            );
+        }
+    }
+    pub fn visit_object<F: FnMut(&str, &ScriptValue)>(&self, callback: F) {
+        //let callback = Box::into_raw(Box::new(callback)) as *mut c_void;
+        unsafe extern "C" fn visit_object_callback<F: FnMut(&str, &ScriptValue)>(
+            key: *const i8,
+            key_len: usize,
+            val: *const kwui_ScriptValue,
+            udata: *mut c_void,
+        ) {
+            let key = std::slice::from_raw_parts(key as *const u8, key_len);
+            let val = ScriptValue::from_inner(val as _);
+            (*(udata as *mut F))(std::str::from_utf8_unchecked(key), &val);
+            std::mem::forget(val);
+        }
+        unsafe {
+            kwui_ScriptValue_visitObject(
+                self.inner,
+                Some(visit_object_callback::<F>),
+                &callback as *const F as _,
+            );
+        }
+    }
+
     pub(crate) fn from_inner(inner: *mut kwui_ScriptValue) -> Self {
         // eprintln!("from_inner {:?}", inner);
         Self { inner }
@@ -35,6 +177,35 @@ impl Drop for ScriptValue {
         // eprintln!("drop {:?}", self.inner);
         unsafe {
             kwui_ScriptValue_delete(self.inner);
+        }
+    }
+}
+
+impl std::fmt::Debug for ScriptValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.is_null() {
+            f.write_str("ScriptValue::Null")
+        } else if self.is_bool() {
+            f.write_fmt(format_args!("ScriptValue::Bool({})", self.to_bool()))
+        } else if self.is_number() {
+            f.write_fmt(format_args!("ScriptValue::Number({:?})", self.to_double()))
+        } else if self.is_string() {
+            f.write_fmt(format_args!("ScriptValue::String({:?})", self.to_string()))
+        } else if self.is_array() {
+            f.write_str("ScriptValue::Array")?;
+            let mut dl = f.debug_list();
+            self.visit_array(|index, value| {
+                let _ = dl.entry(value);
+            });
+            dl.finish()
+        } else if self.is_object() {
+            let mut ds = f.debug_struct("ScriptValue::Object");
+            self.visit_object(|key, value| {
+                let _ = ds.field(key, value);
+            });
+            ds.finish()
+        } else {
+            f.write_str("ScriptValue::UnknownType")
         }
     }
 }
@@ -145,5 +316,24 @@ impl IntoScriptValue for &str {
     fn into_script_value(self) -> Result<ScriptValue, ()> {
         let inner = unsafe { kwui_ScriptValue_newString(self.as_ptr() as _, self.len()) };
         Ok(ScriptValue::from_inner(inner))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_array() {
+        let mut aa = ScriptValue::new_array();
+        aa.set_by_index(0, 1);
+        aa.set_by_index(1, 2);
+        aa.set_by_index(2, 3);
+        assert_eq!(aa.length(), 3);
+        assert_eq!(aa.get_by_index::<usize>(0), 1);
+
+        aa.visit_array(|index, val| {
+            assert_eq!(index as i32 + 1, val.to_int());
+        });
     }
 }

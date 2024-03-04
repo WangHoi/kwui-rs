@@ -63,8 +63,10 @@ impl ScriptEngine {
         A: ScriptFuntionParams,
     {
         let c_event = CString::new(event).unwrap();
+        let e = event.to_string();
         let closure: Box<Callback> = Box::new(Box::new(
             move |args: &[ScriptValue]| -> Result<ScriptValue, ()> {
+                eprintln!("{} triggered", e);
                 func(A::from_params(args)?).into_script_value()
             },
         ) as Callback);
