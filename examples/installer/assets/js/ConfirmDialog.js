@@ -85,14 +85,14 @@ button.border:active {
 }
 `;
 
-export function builder(props) {
+export function builder({ title, label, action_btn, cancel_btn, skip_btn }) {
     return {
         root: <ConfirmDialog
-            title={props.title}
-            label={props.label}
-            action_btn={props.action_btn}
-            cancel_btn={props.cancel_btn}
-            skip_btn={props.skip_btn}
+            title={title}
+            label={label}
+            action_btn={action_btn}
+            cancel_btn={cancel_btn}
+            skip_btn={skip_btn}
         />,
         stylesheet: ConfirmDialogStyle,
     };

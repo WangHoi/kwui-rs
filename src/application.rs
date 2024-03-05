@@ -32,6 +32,9 @@ impl Application {
     pub fn exec(&self) -> i32 {
         unsafe { kwui_Application_exec(self.inner) }
     }
+    pub fn quit() {
+        unsafe { kwui_Application_quit() }
+    }
 }
 
 impl Drop for Application {

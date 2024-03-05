@@ -1,7 +1,7 @@
-mod model;
+mod install_model;
 
 use kwui::{Application, ScriptEngine};
-use model::Model;
+use install_model::Model;
 use windows_dpi::enable_dpi;
 
 fn main() {
@@ -10,8 +10,12 @@ fn main() {
     let app = Application::new();
     app.set_resource_root_dir(concat!(env!("CARGO_MANIFEST_DIR"), "/examples/installer/assets"));
     ScriptEngine::load_file(":/js/entry.js");
+    
     Model::init();
     Model::start_install();
 
     app.exec();
+
+    Model::deinit();
+    
 }

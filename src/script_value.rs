@@ -1,4 +1,5 @@
 use kwui_sys::*;
+use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_int, c_void};
 
@@ -77,6 +78,10 @@ impl ScriptValue {
         let v = ScriptValue::from(v);
         unsafe { kwui_ScriptValue_set_by_str(self.inner, key.as_ptr(), v.inner) };
         std::mem::forget(v);
+    }
+    pub fn set_value_by_str(&mut self, key: &str, v: ScriptValue) {
+        let key = CString::new(key).unwrap_or_default();
+        unsafe { kwui_ScriptValue_set_by_str(self.inner, key.as_ptr(), v.inner) };
     }
     pub fn is_null(&self) -> bool {
         unsafe { kwui_ScriptValue_is_null(self.inner) }
@@ -316,6 +321,30 @@ impl IntoScriptValue for &str {
     fn into_script_value(self) -> Result<ScriptValue, ()> {
         let inner = unsafe { kwui_ScriptValue_newString(self.as_ptr() as _, self.len()) };
         Ok(ScriptValue::from_inner(inner))
+    }
+}
+
+impl<K: From<String> + Eq + std::hash::Hash, V: FromScriptValue + Default> FromScriptValue
+    for HashMap<K, V>
+{
+    fn from_script_value(value: &ScriptValue) -> Result<Self, ()> {
+        let mut obj = Self::new();
+        value.visit_object(|k, v| {
+            let k = k.to_string().into();
+            let v = V::from_script_value(v).unwrap_or_default();
+            obj.insert(k, v);
+        });
+        Ok(obj)
+    }
+}
+
+impl<K: AsRef<str>, V: IntoScriptValue> IntoScriptValue for HashMap<K, V> {
+    fn into_script_value(self) -> Result<ScriptValue, ()> {
+        let mut obj = ScriptValue::new_object();
+        for (k, v) in self.into_iter() {
+            obj.set_value_by_str(k.as_ref(), v.into_script_value()?);
+        }
+        Ok(obj)
     }
 }
 
