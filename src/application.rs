@@ -25,6 +25,10 @@ impl Application {
 
         Self { inner }
     }
+    pub fn set_resource_root_dir(&self, dir: &str) {
+        let dir = CString::new(dir).unwrap();
+        unsafe { kwui_Application_setResourceRootDir(self.inner, dir.as_ptr()) }
+    }
     pub fn exec(&self) -> i32 {
         unsafe { kwui_Application_exec(self.inner) }
     }

@@ -1,16 +1,17 @@
 mod model;
 
 use kwui::{Application, ScriptEngine};
+use model::Model;
 use windows_dpi::enable_dpi;
 
 fn main() {
     enable_dpi();
 
-    let native = model::Model::new();
     let app = Application::new();
-    ScriptEngine::load_file("D:/Projects/kwui-rs/examples/installer/assets/js/entry.js");
-
-    native.start_install();
+    app.set_resource_root_dir(concat!(env!("CARGO_MANIFEST_DIR"), "/examples/installer/assets"));
+    ScriptEngine::load_file(":/js/entry.js");
+    Model::init();
+    Model::start_install();
 
     app.exec();
 }

@@ -1,13 +1,15 @@
-use cmake::{self, Config};
 use bindgen;
+use cmake::{self, Config};
 
 fn main() {
     let cmake_project_dir = "deps/kwui";
     println!("cargo:rerun-if-changed={}/cmake", cmake_project_dir);
     println!("cargo:rerun-if-changed={}/src", cmake_project_dir);
+
     let dst = Config::new(cmake_project_dir)
         .profile("Release")
         .define("CMAKE_CONFIGURATION_TYPES", "Release")
+        .define("CRT_STATIC", if crt_static() { "ON" } else { "OFF" })
         .define("BUILD_TESTS", "OFF")
         .define("BUILD_EXAMPLES", "OFF")
         .generator("Ninja")
@@ -30,9 +32,7 @@ fn main() {
         .header(format!("{}/include/kwui_capi.h", dst.display()))
         .allowlist_function("kwui_.*")
         .layout_tests(false)
-        .clang_args([
-            "-DKWUI_STATIC_LIBRARY=1",
-            ])
+        .clang_args(["-DKWUI_STATIC_LIBRARY=1"])
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
@@ -46,4 +46,14 @@ fn main() {
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
+}
+
+#[cfg(target_feature = "crt-static")]
+fn crt_static() -> bool {
+    true
+}
+
+#[cfg(not(target_feature = "crt-static"))]
+fn crt_static() -> bool {
+    false
 }

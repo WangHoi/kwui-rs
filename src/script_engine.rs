@@ -66,7 +66,6 @@ impl ScriptEngine {
         let e = event.to_string();
         let closure: Box<Callback> = Box::new(Box::new(
             move |args: &[ScriptValue]| -> Result<ScriptValue, ()> {
-                eprintln!("{} triggered", e);
                 func(A::from_params(args)?).into_script_value()
             },
         ) as Callback);
@@ -80,7 +79,7 @@ impl ScriptEngine {
         }
     }
     pub fn remove_event_listener(handler: &mut ScriptEventHandler) {
-        eprintln!("remove_event_listener {}", handler.event.to_string_lossy());
+        // eprintln!("remove_event_listener {}", handler.event.to_string_lossy());
         unsafe {
             kwui_ScriptEngine_removeEventListener(
                 handler.event.as_ptr(),
