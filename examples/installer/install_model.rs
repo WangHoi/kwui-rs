@@ -257,6 +257,8 @@ impl Model {
         MODEL.with_borrow_mut(|m| m.dialog_id = dialog_id.to_string());
     }
     pub fn deinit() {
+        Model::close_confirm_dialog();
+        Model::close_main_dialog();
         MODEL.take();
     }
 }

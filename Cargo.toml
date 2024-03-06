@@ -29,3 +29,6 @@ name = "installer"
 
 [dev-dependencies]
 windows_dpi = "0.3.0"
+
+[build-dependencies]
+embed-resource = "2.4.1"
