@@ -158,7 +158,6 @@ impl Model {
         ScriptEngine::post_event0("install-dialog:main-page-expanded");
     }
     fn on_start_button_clicked(_: ()) {
-        eprintln!("on_start_button_clicked");
         MODEL.with_borrow_mut(|m| m.current_page = "progress");
         ScriptEngine::post_event0("install-dialog:current-page-changed");
     }

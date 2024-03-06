@@ -11,13 +11,13 @@ function MainPageExpanded(props, kids) {
         app.post("install-dialog:browse-button-clicked", this.dialogId);
     };
     let text_changed = (text) => {
-        console.log("text-changed", text);
+        // console.log("text-changed", text);
         app.post("install-dialog:path-text-changed", text);
     };
     let [targetDir, _] = useNativeProp(getTargetDir, "install-dialog:target-dir-changed");
     let [estimateSizeMB, availSizeGB] = useNativeProp(getFreeSpace, "install-dialog:free-space-changed");
     //console.log("getFreeSpace:", JSON.stringify(getFreeSpace()), estimateSizeMB, availSizeGB);
-    console.log("targetDir", targetDir);
+    // console.log("targetDir", targetDir);
     let free_space_label = availSizeGB
         ? `所需空间: ${estimateSizeMB}MB 可用空间: ${availSizeGB}GB`
         : `所需空间: ${estimateSizeMB}MB`;
@@ -41,12 +41,11 @@ function MainPageExpanded(props, kids) {
             {free_space_label}
         </p>
     </div>);
-    console.log(a);
     return a;
 }
 
 function FlatIconTextButton({ icon, onclick }, kids) {
-    console.log("icon:", icon);
+    // console.log("icon:", icon);
     return <button class="flat-icon-text-button" onclick={onclick}>
         <span id="text">更多选项</span>
         <img id="icon" src={icon}></img>
@@ -72,7 +71,7 @@ function MainPage(props, kids) {
         }
     };
     let flat_icon = expanded ? ":/images/collapse.png" : ":/images/expand.png";
-    console.log("expanded:", expanded, "flat_icon:", flat_icon);
+    // console.log("expanded:", expanded, "flat_icon:", flat_icon);
     return <div>
         <div style="margin-top: 20px; text-align: center;">
             <button class="primary" id="start-button" onclick={on_start_click}>{"安装"}</button>
