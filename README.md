@@ -57,13 +57,13 @@ app.showDialog({
 ## 样例展示
 
 ### 通话质量测试工具
-![image](docs/VoIPTool.png)
+![image](https://gitee.com/wanghoi/kwui/raw/master/docs/VoIPTool.png)
 
 ### 远程桌面客户端
-![image](docs/KuDesk.jpg)
+![image](https://gitee.com/wanghoi/kwui/raw/master/docs/KuDesk.jpg)
 
 ### 安装程序
-![image](docs/installer.png)
+![image](https://gitee.com/wanghoi/kwui/raw/master/docs/installer.png)
 
 ## 常见问题
 
