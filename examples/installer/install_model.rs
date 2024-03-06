@@ -1,4 +1,4 @@
-use kwui::{Application, IntoScriptValue, ScriptEngine, ScriptEventHandler, ScriptValue};
+use kwui::{IntoScriptValue, ScriptEngine, ScriptEventHandler, ScriptValue};
 use std::cell::RefCell;
 
 struct Product {
