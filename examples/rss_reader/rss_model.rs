@@ -1,4 +1,4 @@
-use kwui::{IntoScriptValue, ScriptEngine, ScriptEventHandler, ScriptValue};
+use kwui::{IntoScriptValue, ScriptEngine, ScriptValue};
 use reqwest;
 use rss;
 use std::cell::RefCell;
@@ -45,7 +45,6 @@ pub struct Model;
 #[derive(Default)]
 struct ModelState {
     channel: Option<Channel>,
-    on_channel_loaded_handler: Option<ScriptEventHandler>,
     rt: Option<tokio::runtime::Runtime>,
 }
 
@@ -61,7 +60,6 @@ impl ModelState {
             .unwrap();
         Self {
             channel: None,
-            on_channel_loaded_handler: None,
             rt: rt.into(),
         }
     }
@@ -73,9 +71,11 @@ impl Model {
         ScriptEngine::add_global_function("reloadChannel", Model::reload_channel);
     }
     fn reload_channel(_: ()) {
-        MODEL.with_borrow(|m| {
+        MODEL.with_borrow_mut(|m| {
+            m.channel = None;
             m.rt.as_ref().unwrap().spawn(Model::do_load_channel());
         });
+        ScriptEngine::post_event1("main-dialog:channel-loaded", Channel::default());
     }
     fn get_channel(_: ()) -> Channel {
         MODEL.with_borrow(|m| m.channel.clone().unwrap_or_default())
@@ -85,7 +85,6 @@ impl Model {
     }
 
     fn on_channel_loaded(channel: Channel) {
-        eprintln!("on_channel_loaded, main_thread {}", kwui::Application::is_main_thread());
         let ch = channel.clone();
         MODEL.with_borrow_mut(|m| m.channel.replace(ch));
         ScriptEngine::post_event1("main-dialog:channel-loaded", channel);
