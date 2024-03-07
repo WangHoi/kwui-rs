@@ -1,6 +1,6 @@
 [package]
 name = "kwui-sys"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 links = "kwui_static"
 #publish = ["crates-io"]

@@ -1,6 +1,6 @@
 [package]
 name = "kwui"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "A GUI library with JSX/CSS support"
 # publish = ["crates-io"]

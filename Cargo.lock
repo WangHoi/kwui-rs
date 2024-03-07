@@ -614,7 +614,7 @@ dependencies = [
 
 [[package]]
 name = "kwui"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "embed-resource",
@@ -628,7 +628,7 @@ dependencies = [
 
 [[package]]
 name = "kwui-sys"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bindgen",
  "cmake",
