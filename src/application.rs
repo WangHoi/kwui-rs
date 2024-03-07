@@ -5,6 +5,8 @@ pub struct Application {
     inner: *mut kwui_Application,
 }
 
+type Closure<'a> = Box<dyn FnOnce() + 'a>;
+
 impl Application {
     pub fn new() -> Self {
         let args = std::env::args()
@@ -25,6 +27,16 @@ impl Application {
 
         Self { inner }
     }
+    pub fn is_main_thread() -> bool {
+        unsafe { kwui_Application_isMainThread() }
+    }
+    pub fn run_in_main_thread<F: FnOnce()>(f: F) {
+        let closure: Box<Closure> = Box::new(Box::new(f) as Closure);
+
+        unsafe {
+            kwui_Application_runInMainThread(Some(invoke_closure), Box::into_raw(closure) as _)
+        }
+    }
     pub fn set_resource_root_dir(&self, dir: &str) {
         let dir = CString::new(dir).unwrap();
         unsafe { kwui_Application_setResourceRootDir(self.inner, dir.as_ptr()) }
@@ -35,6 +47,12 @@ impl Application {
     pub fn quit() {
         unsafe { kwui_Application_quit() }
     }
+}
+
+unsafe extern "C" fn invoke_closure(udata: *mut ::std::os::raw::c_void) {
+    eprintln!("invoke_closure called");
+    let closure = std::ptr::read(udata as *mut Closure);
+    closure();
 }
 
 impl Drop for Application {

@@ -22,12 +22,16 @@ path = "kwui-sys"
 version = "0.1.0"
 
 [[example]]
-name = "tour"
+name = "rss_reader"
 
 [[example]]
 name = "installer"
 
 [dev-dependencies]
+anyhow = "1.0.80"
+reqwest = "0.11.24"
+rss = "2.0.7"
+tokio = { version = "1.36.0", features = ["full"] }
 windows_dpi = "0.3.0"
 
 [build-dependencies]
