@@ -19,7 +19,7 @@ log = "0.4.20"
 
 [dependencies.kwui-sys]
 path = "kwui-sys"
-version = "0.1.0"
+version = "0.1.1"
 
 [[example]]
 name = "rss_reader"
