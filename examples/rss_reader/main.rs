@@ -10,10 +10,19 @@ fn main() {
     enable_dpi();
 
     let app = Application::new();
-    app.set_resource_root_dir(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/examples/rss_reader/assets"
-    ));
+
+    if cfg!(debug_assertions) {
+        app.set_resource_root_dir(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/examples/rss_reader/assets"
+        ));
+    } else {
+        const RES: &'static [u8] = include_bytes!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/examples/rss_reader/assets.ar"
+        ));
+        app.set_resource_root_data(RES);
+    }
 
     Model::init();
 

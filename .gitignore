@@ -41,3 +41,5 @@
 
 /target
 /kwui-sys/target
+
+/examples/*/assets.ar

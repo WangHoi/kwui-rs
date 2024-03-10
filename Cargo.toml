@@ -36,3 +36,5 @@ windows_dpi = "0.3.0"
 
 [build-dependencies]
 embed-resource = "2.4.1"
+kwui-cli = { path = "../kwui-cli" }
+walkdir = "2.5.0"
