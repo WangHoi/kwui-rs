@@ -10,10 +10,19 @@ fn main() {
     enable_dpi();
 
     let app = Application::new();
-    app.set_resource_root_dir(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/examples/installer/assets"
-    ));
+    if cfg!(debug_assertions) {
+        app.set_resource_root_dir(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/examples/installer/assets"
+        ));
+    } else {
+        const RES: &'static [u8] = include_bytes!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/examples/installer/assets.ar"
+        ));
+        app.set_resource_root_data(RES);
+    }
+
     ScriptEngine::load_file(":/js/entry.js");
 
     Model::init();

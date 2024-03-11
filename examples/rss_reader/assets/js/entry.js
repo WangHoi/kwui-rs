@@ -16,8 +16,8 @@ globalThis.showMainDialog = function (props) {
     //console.log("showConfirmDialog:", JSON.stringify(data));
     let dialogId = app.showDialog({
         title: "RSS Reader",
-        width: 1280,
-        height: 720,
+        width: 640,
+        height: 480,
         flags: 1,
         modulePath: "./MainDialog.js",
         moduleParams: props,
