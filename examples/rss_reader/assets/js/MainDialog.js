@@ -1,4 +1,4 @@
-import { useState } from "Keact";
+import { useState, useEffect } from "Keact";
 import { useNativeProp } from "./util.js";
 import { Theme } from "./Theme.js"
 
@@ -17,17 +17,43 @@ function ItemEntry({ title, content }) {
 }
 
 export function MainDialog(props, kids) {
-    let channel = useNativeProp(getChannel, "main-dialog:channel-loaded");
-    let text = channel.items.length == 0 ? "没有数据" : "已加载：";
+    // let chan = useNativeProp(getChannel, "main-dialog:channel-loaded");
+    // let chan_empty = chan.items.length == 0;
+    let [chanState, setChanState] = useState(0); // 0-empty, 1-loading, 2-loaded
+    let [chan, setChan] = useState(() => getChannel());
+    useEffect(() => {
+        app.addListener("main-dialog:channel-loaded", () => {
+            let chan = getChannel();
+            if (chan.items.length > 0) {
+                setChan(chan);
+                setChanState(2);
+            }
+        });
+        return () => {
+            app.removeListener("main-dialog:channel-loaded");
+        };
+    });
+    let btn_text = chanState == 0 ? "加载" : "刷新";
+    let on_btn_click = () => {
+        setChan({
+            title: "正在加载...",
+            items: []
+        });
+        setChanState(1);
+        reloadChannel();
+    };
+    let load_widget = chanState == 1
+        ? <spinner style="width:24px;height:24px;vertical-align:-4px"></spinner>
+        : <button class="primary" style="margin-right: 8px;" onclick={on_btn_click}>{btn_text}</button>;
     return (
         <body>
             <div>
-                <button class="primary" style="margin-right: 8px;" onclick={() => reloadChannel()}>加载</button>
-                <span style="font-size:24px; line-height: 32px;">{`${text}${channel.title}`}</span>
+                {load_widget}
+                <span style="font-size:24px; line-height: 32px;">{`${chan.title}`}</span>
             </div>
             <div>
                 {
-                    channel.items.map(item => <ItemEntry title={item.title} content={item.description} />)
+                    chan.items.map(item => <ItemEntry title={item.title} content={item.description} />)
                 }
             </div>
         </body >
