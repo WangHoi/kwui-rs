@@ -17,20 +17,19 @@ function ItemEntry({ title, content }) {
 }
 
 export function MainDialog(props, kids) {
-    // let chan = useNativeProp(getChannel, "main-dialog:channel-loaded");
-    // let chan_empty = chan.items.length == 0;
     let [chanState, setChanState] = useState(0); // 0-empty, 1-loading, 2-loaded
     let [chan, setChan] = useState(() => getChannel());
     useEffect(() => {
-        app.addListener("main-dialog:channel-loaded", () => {
+        let handler = () => {
             let chan = getChannel();
             if (chan.items.length > 0) {
                 setChan(chan);
                 setChanState(2);
             }
-        });
+        };
+        app.addListener("main-dialog:channel-loaded", handler);
         return () => {
-            app.removeListener("main-dialog:channel-loaded");
+            app.removeListener("main-dialog:channel-loaded", handler);
         };
     });
     let btn_text = chanState == 0 ? "加载" : "刷新";
