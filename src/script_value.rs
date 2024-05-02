@@ -143,7 +143,7 @@ impl ScriptValue {
     pub fn visit_object<F: FnMut(&str, &ScriptValue)>(&self, callback: F) {
         //let callback = Box::into_raw(Box::new(callback)) as *mut c_void;
         unsafe extern "C" fn visit_object_callback<F: FnMut(&str, &ScriptValue)>(
-            key: *const i8,
+            key: *const std::os::raw::c_char,
             key_len: usize,
             val: *const kwui_ScriptValue,
             udata: *mut c_void,

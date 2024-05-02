@@ -1,3 +1,4 @@
+workspace = { members = ["kwui-macros"] }
 [package]
 name = "kwui"
 version = "0.1.1"
@@ -14,24 +15,35 @@ readme = "README.md"
 name = "kwui"
 path = "src/lib.rs"
 
-[dependencies]
-log = "0.4.20"
+[dependencies.kwui-macros]
+path = "kwui-macros"
+version = "0.1.1"
 
 [dependencies.kwui-sys]
 path = "kwui-sys"
 version = "0.1.1"
+
+[dependencies]
+log = "0.4.20"
 
 [[example]]
 name = "rss_reader"
 
 [[example]]
 name = "installer"
+path = "examples/installer/main.rs"
+crate-type = ["cdylib"]
 
 [dev-dependencies]
 anyhow = "1.0.80"
-reqwest = "0.11.24"
 rss = "2.0.7"
 tokio = { version = "1.36.0", features = ["full"] }
+
+[target.'cfg(target_os = "android")'.dev-dependencies]
+reqwest = { version = "0.11.24", default-features = false }
+
+[target.'cfg(not(target_os = "android"))'.dev-dependencies]
+reqwest = { version = "0.11.24" }
 windows_dpi = "0.3.0"
 
 [build-dependencies]

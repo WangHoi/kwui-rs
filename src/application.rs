@@ -15,7 +15,7 @@ impl Application {
             .collect::<Vec<_>>();
         let mut args = args
             .iter()
-            .map(|s| s.as_ptr() as *mut i8)
+            .map(|s| s.as_ptr() as *mut std::os::raw::c_char)
             .collect::<Vec<_>>();
         let argc = args.len() as _;
         let inner = unsafe {

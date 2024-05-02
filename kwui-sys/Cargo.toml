@@ -19,4 +19,6 @@ path = "src/lib.rs"
 
 [build-dependencies]
 bindgen = "0.69.4"
-cmake = "0.1.50"
+build-target = "0.4.0"
+#cmake = { git = "https://gitee.com/wanghoi/cmake-rs.git" }
+cmake = { path = "d:/projects/cmake-rs" }

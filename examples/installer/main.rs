@@ -4,9 +4,13 @@ mod install_model;
 
 use install_model::Model;
 use kwui::{Application, ScriptEngine};
+
+#[cfg(target_os = "windows")]
 use windows_dpi::enable_dpi;
 
+#[kwui::main]
 fn main() {
+    #[cfg(target_os = "windows")]
     enable_dpi();
 
     let app = Application::new();
