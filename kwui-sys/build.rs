@@ -1,4 +1,4 @@
-use bindgen;
+use bindgen::{self, callbacks::ParseCallbacks};
 use cmake::{self, Config};
 use std::path::PathBuf;
 use build_target;
@@ -24,7 +24,7 @@ fn main() {
             vec![
                 "-DKWUI_SHARED_LIBRARY=1".to_string(),
                 format!("--sysroot={}/toolchains/llvm/prebuilt/windows-x86_64/sysroot", android_ndk_home),
-                format!("-I{}/toolchains/llvm/prebuilt/windows-x86_64/lib/clang/17.0.2/include", android_ndk_home),
+                format!("-I{}/toolchains/llvm/prebuilt/windows-x86_64/lib/clang/18/include", android_ndk_home),
             ]
         },
         _ => vec!["-DKWUI_STATIC_LIBRARY=1".to_string()],
@@ -96,5 +96,7 @@ fn cmake_config_android(cmake_project_dir: &str) -> PathBuf {
         .define("BUILD_TESTS", "OFF")
         .generator("Ninja")
         .build();
+    println!("cargo:rustc-link-search=native={}/lib", dst.display());
+    println!("cargo:rustc-link-lib=dylib=kwui");
     dst
 }
