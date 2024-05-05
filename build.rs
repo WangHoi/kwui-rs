@@ -5,7 +5,7 @@ use walkdir::WalkDir;
 
 fn main() {
     pack_examples_resources();
-    embed_resource::compile_for_examples("resources/windows/icon.rc", embed_resource::NONE);
+    // embed_resource::compile_for_examples("resources/windows/icon.rc", embed_resource::NONE);
 
     if let Ok(build_target::Os::Android) = build_target::target_os() {
         copy_kwui_library_android();

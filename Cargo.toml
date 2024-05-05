@@ -26,18 +26,6 @@ path = "src/lib.rs"
 log = "0.4.20"
 kwui-sys = { version = "0.1.0", path = "kwui-sys" }
 
-[dev-dependencies]
-anyhow = "1.0.80"
-rss = "2.0.7"
-tokio = { version = "1.36.0", features = ["full"] }
-
-[target.'cfg(target_os = "android")'.dev-dependencies]
-reqwest = { version = "0.11.24", default-features = false }
-
-[target.'cfg(not(target_os = "android"))'.dev-dependencies]
-reqwest = { version = "0.11.24" }
-windows_dpi = "0.3.0"
-
 [build-dependencies]
 build-target = "0.4.0"
 embed-resource = "2.4.1"

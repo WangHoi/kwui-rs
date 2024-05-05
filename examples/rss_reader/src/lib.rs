@@ -8,7 +8,7 @@ use rss_model::Model;
 #[cfg(target_os = "windows")]
 use windows_dpi;
 
-fn main() {
+pub fn entry() {
     #[cfg(target_os = "windows")]
     windows_dpi::enable_dpi();
 

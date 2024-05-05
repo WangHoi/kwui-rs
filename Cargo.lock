@@ -757,7 +757,6 @@ dependencies = [
  "anyhow",
  "kwui",
  "reqwest",
- "rss",
  "tokio",
  "windows_dpi",
 ]
@@ -796,17 +795,12 @@ dependencies = [
 name = "kwui"
 version = "0.1.1"
 dependencies = [
- "anyhow",
  "build-target",
  "embed-resource",
  "kwui-cli",
  "kwui-sys",
  "log",
- "reqwest",
- "rss",
- "tokio",
  "walkdir",
- "windows_dpi",
 ]
 
 [[package]]
@@ -1279,6 +1273,18 @@ dependencies = [
  "derive_builder",
  "never",
  "quick-xml",
+]
+
+[[package]]
+name = "rss_reader"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "kwui",
+ "reqwest",
+ "rss",
+ "tokio",
+ "windows_dpi",
 ]
 
 [[package]]
