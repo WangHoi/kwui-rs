@@ -4,22 +4,25 @@ mod rss_model;
 
 use kwui::{Application, ScriptEngine};
 use rss_model::Model;
-use windows_dpi::enable_dpi;
+
+#[cfg(target_os = "windows")]
+use windows_dpi;
 
 fn main() {
-    enable_dpi();
+    #[cfg(target_os = "windows")]
+    windows_dpi::enable_dpi();
 
     let app = Application::new();
 
-    if cfg!(debug_assertions) {
+    if cfg!(all(target_os = "windows", debug_assertions)) {
         app.set_resource_root_dir(concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/examples/rss_reader/assets"
+            "/assets"
         ));
     } else {
         const RES: &'static [u8] = include_bytes!(concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/examples/rss_reader/assets.ar"
+            "/assets.ar"
         ));
         app.set_resource_root_data(RES);
     }
@@ -33,10 +36,9 @@ fn main() {
     Model::deinit();
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test() {
-        eprintln!("miao");
-    }
+#[cfg(target_os = "android")]
+#[no_mangle]
+pub unsafe extern "C" fn kwui_main(_argc: std::os::raw::c_int, _argv: std::os::raw::c_char) -> std::os::raw::c_int {
+    entry();
+    0
 }

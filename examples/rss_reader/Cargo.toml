@@ -2,7 +2,7 @@
 version = "0.1.0"
 edition = "2021"
 resolver = "2"
-name = "installer"
+name = "rss_reader"
 autobins = false
 
 [lib]
@@ -10,11 +10,12 @@ crate-type = ["lib", "cdylib"]
 path = "src/lib.rs"
 
 [[bin]]
-name = "installer_runner"
+name = "rss_reader_runner"
 path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0.80"
+rss = "2.0.7"
 tokio = { version = "1.36.0", features = ["full"] }
 kwui = { path = "../../" }
 

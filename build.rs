@@ -50,12 +50,17 @@ fn copy_kwui_library_android() {
         std::env::var("PROFILE").unwrap()
     );
     let kwui_src_dir = std::env::var("DEP_KWUI_SYS_ROOT").unwrap();
-    println!("cargo::rerun-if-changed={}/lib/libkwui.so", kwui_src_dir);
-    println!("cargo::rerun-if-changed={}/libkwui.so", copy_dest_dir);
     let _ = std::fs::remove_file(format!("{}/libkwui.so", copy_dest_dir));
     std::fs::hard_link(
         format!("{}/lib/libkwui.so", kwui_src_dir),
         format!("{}/libkwui.so", copy_dest_dir),
     )
     .expect("copy libkwui.so failed");
+
+    println!("cargo::rerun-if-env-changed=DEP_KWUI_SYS_ROOT");
+    println!("cargo::rerun-if-changed={}/lib/libkwui.so", kwui_src_dir);
+    println!("cargo::rerun-if-changed={}/libkwui.so", copy_dest_dir);
+    println!("cargo::rerun-if-changed=src");
+    println!("cargo::rerun-if-changed=build.rs");
+    println!("cargo::rerun-if-changed=Cargo.toml");
 }

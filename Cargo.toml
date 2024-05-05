@@ -1,5 +1,5 @@
 [workspace]
-members = ["examples/installer"]
+members = ["examples/installer", "examples/rss_reader"]
 
 [package]
 name = "kwui"
@@ -22,15 +22,9 @@ autobenches = false
 name = "kwui"
 path = "src/lib.rs"
 
-[dependencies.kwui-sys]
-path = "kwui-sys"
-version = "0.1.1"
-
 [dependencies]
 log = "0.4.20"
-
-[[example]]
-name = "rss_reader"
+kwui-sys = { version = "0.1.0", path = "kwui-sys" }
 
 [dev-dependencies]
 anyhow = "1.0.80"

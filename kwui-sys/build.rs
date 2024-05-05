@@ -5,8 +5,8 @@ use build_target;
 
 fn main() {
     let cmake_project_dir = "deps/kwui";
-    println!("cargo:rerun-if-changed={}/cmake", cmake_project_dir);
-    println!("cargo:rerun-if-changed={}/src", cmake_project_dir);
+    // println!("cargo:rerun-if-changed={}/cmake", cmake_project_dir);
+    // println!("cargo:rerun-if-changed={}/src", cmake_project_dir);
 
     let target_os = build_target::target_os().unwrap();
     let dst = match target_os {
