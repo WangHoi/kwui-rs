@@ -1,0 +1,27 @@
+[package]
+version = "0.1.0"
+edition = "2021"
+resolver = "2"
+name = "installer"
+autobins = false
+
+[lib]
+crate-type = ["lib", "cdylib"]
+path = "src/lib.rs"
+
+[[bin]]
+name = "installer_runner"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.80"
+rss = "2.0.7"
+tokio = { version = "1.36.0", features = ["full"] }
+kwui = { path = "../../" }
+
+[target.'cfg(target_os = "android")'.dependencies]
+reqwest = { version = "0.11.24", default-features = false }
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+reqwest = { version = "0.11.24" }
+windows_dpi = "0.3.0"

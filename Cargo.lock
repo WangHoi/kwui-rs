@@ -751,6 +751,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "installer"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "kwui",
+ "reqwest",
+ "rss",
+ "tokio",
+ "windows_dpi",
+]
+
+[[package]]
 name = "ipnet"
 version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -785,9 +797,9 @@ name = "kwui"
 version = "0.1.1"
 dependencies = [
  "anyhow",
+ "build-target",
  "embed-resource",
  "kwui-cli",
- "kwui-macros",
  "kwui-sys",
  "log",
  "reqwest",
@@ -813,15 +825,6 @@ dependencies = [
  "sha1",
  "size",
  "walkdir",
-]
-
-[[package]]
-name = "kwui-macros"
-version = "0.1.1"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.60",
 ]
 
 [[package]]

@@ -2,7 +2,7 @@
 name = "kwui-sys"
 version = "0.1.1"
 edition = "2021"
-links = "kwui"
+links = "kwui-sys"
 #publish = ["crates-io"]
 description = "sys-crate for kwui - A GUI library with JSX/CSS support"
 license = "LGPL-3.0-or-later"

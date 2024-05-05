@@ -1,4 +1,6 @@
-workspace = { members = ["kwui-macros"] }
+[workspace]
+members = ["examples/installer"]
+
 [package]
 name = "kwui"
 version = "0.1.1"
@@ -10,14 +12,15 @@ keywords = ["graphics", "gui", "widgets", "jsx", "quickjs"]
 categories = ["gui", "api-bindings"]
 repository = "https://gitee.com/wanghoi/kwui-rs"
 readme = "README.md"
+links = "kwui"
+autobins = false
+autoexamples = false
+autotests = false
+autobenches = false
 
 [lib]
 name = "kwui"
 path = "src/lib.rs"
-
-[dependencies.kwui-macros]
-path = "kwui-macros"
-version = "0.1.1"
 
 [dependencies.kwui-sys]
 path = "kwui-sys"
@@ -28,11 +31,6 @@ log = "0.4.20"
 
 [[example]]
 name = "rss_reader"
-
-[[example]]
-name = "installer"
-path = "examples/installer/main.rs"
-crate-type = ["cdylib"]
 
 [dev-dependencies]
 anyhow = "1.0.80"
@@ -47,6 +45,7 @@ reqwest = { version = "0.11.24" }
 windows_dpi = "0.3.0"
 
 [build-dependencies]
+build-target = "0.4.0"
 embed-resource = "2.4.1"
 kwui-cli = { path = "../kwui-cli" }
 walkdir = "2.5.0"

@@ -6,4 +6,3 @@ mod script_value;
 pub use application::*;
 pub use script_engine::*;
 pub use script_value::*;
-pub use kwui_macros::main;

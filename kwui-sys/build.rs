@@ -1,4 +1,4 @@
-use bindgen::{self, callbacks::ParseCallbacks};
+use bindgen;
 use cmake::{self, Config};
 use std::path::PathBuf;
 use build_target;
@@ -78,6 +78,7 @@ fn cmake_config_windows(cmake_project_dir: &str) -> PathBuf {
     println!("cargo:rustc-link-lib=d2d1");
     println!("cargo:rustc-link-lib=dwrite");
     println!("cargo:rustc-link-lib=Windowscodecs");
+    println!("cargo:root={}", dst.display());
     dst
 }
 
@@ -98,5 +99,6 @@ fn cmake_config_android(cmake_project_dir: &str) -> PathBuf {
         .build();
     println!("cargo:rustc-link-search=native={}/lib", dst.display());
     println!("cargo:rustc-link-lib=dylib=kwui");
+    println!("cargo:root={}", dst.display());
     dst
 }
