@@ -1,4 +1,4 @@
-import { useState, useEffect } from "Keact";
+import { useState, useEffect } from "./keact.js";
 import { useNativeProp } from "./util.js";
 import { Theme } from "./Theme.js"
 

@@ -173,12 +173,16 @@ unsafe extern "C" fn invoke_closure(
     argv: *mut *mut kwui_ScriptValue,
     udata: *mut ::std::os::raw::c_void,
 ) -> *mut kwui_ScriptValue {
-    //eprintln!("invoke_closure called argc={}", argc);
+    // eprintln!("invoke_closure called argc={} argv={:?}", argc, argv);
     let closure = (udata as *mut Callback).as_mut().unwrap();
-    let args: Vec<ScriptValue> = std::slice::from_raw_parts(argv, argc as _)
-        .iter()
-        .map(|inner| ScriptValue::from_inner(*inner))
-        .collect();
+    let args: Vec<ScriptValue> = if argc > 0 {
+        std::slice::from_raw_parts(argv, argc as _)
+            .iter()
+            .map(|inner| ScriptValue::from_inner(*inner))
+            .collect()
+    } else {
+        Vec::new()
+    };
     let ret = closure(&args);
     for a in args.into_iter() {
         a.leak();

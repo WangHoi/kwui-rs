@@ -13,7 +13,7 @@ pub fn entry() {
     windows_dpi::enable_dpi();
 
     let app = Application::new();
-
+    
     if cfg!(all(target_os = "windows", debug_assertions)) {
         app.set_resource_root_dir(concat!(
             env!("CARGO_MANIFEST_DIR"),
