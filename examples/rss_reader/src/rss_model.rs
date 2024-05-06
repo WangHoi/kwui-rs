@@ -1,13 +1,16 @@
-use kwui::{IntoScriptValue, ScriptEngine, ScriptValue};
+use boring::ssl::{SslAcceptor, SslConnector, SslFiletype, SslMethod, SslVerifyMode};
 use hyper::client::HttpConnector;
-use hyper::{service, Method, Request, Response};
-use hyper::{Body, Client, Error};
+use hyper::{body::Buf, Request};
+use hyper::{service, Response};
+use hyper::{Body, Client};
 use hyper_boring::HttpsConnector;
+use kwui::{IntoScriptValue, ScriptEngine, ScriptValue};
 use rss;
 use std::cell::RefCell;
 use tokio;
+use tokio::net::TcpStream;
 
-const FEED_URL: &str = "https://feed.williamlong.info/";
+const FEED_URL: &str = "https://www.vgtime.com/rss.jhtml";
 
 #[derive(Debug, Clone, Default)]
 struct Channel {
@@ -102,19 +105,20 @@ impl Model {
         let http_client = Client::builder()
             .pool_max_idle_per_host(32)
             .build::<_, Body>(ssl);
-        let content = http_client.http_get(FEED_URL)
+        let content = http_client
+            .get(FEED_URL.parse().expect("Parse FEED_URL error"))
             .await
             .map_err(|e| {
                 eprintln!("get error: {}", e);
                 e
             })?
-            .bytes()
-            .await
-            .map_err(|e| {
-                eprintln!("get body error: {}", e);
-                e
-            })?;
-        let rss_chan = rss::Channel::read_from(&content[..]).map_err(|e| {
+            .into_body();
+        let body_bytes = hyper::body::to_bytes(content).await.map_err(|e| {
+            eprintln!("get body error: {}", e);
+            e
+        })?;
+        eprintln!("body_bytes len={}", body_bytes.len());
+        let rss_chan = rss::Channel::read_from(&body_bytes[..]).map_err(|e| {
             eprintln!("parse channel error: {}", e);
             e
         })?;
