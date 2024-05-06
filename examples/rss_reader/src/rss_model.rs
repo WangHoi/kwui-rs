@@ -1,5 +1,8 @@
 use kwui::{IntoScriptValue, ScriptEngine, ScriptValue};
-use reqwest;
+use hyper::client::HttpConnector;
+use hyper::{service, Method, Request, Response};
+use hyper::{Body, Client, Error};
+use hyper_boring::HttpsConnector;
 use rss;
 use std::cell::RefCell;
 use tokio;
@@ -91,7 +94,15 @@ impl Model {
     }
     async fn do_load_channel() -> anyhow::Result<()> {
         eprintln!("load channel");
-        let content = reqwest::get(FEED_URL)
+        let mut http = HttpConnector::new();
+        http.enforce_http(false);
+        let mut ssl = SslConnector::builder(SslMethod::tls_client()).expect("new ssl_ctx builder");
+        ssl.set_verify(SslVerifyMode::NONE);
+        let ssl = HttpsConnector::with_connector(http, ssl).expect("new ssl_ctx");
+        let http_client = Client::builder()
+            .pool_max_idle_per_host(32)
+            .build::<_, Body>(ssl);
+        let content = http_client.http_get(FEED_URL)
             .await
             .map_err(|e| {
                 eprintln!("get error: {}", e);

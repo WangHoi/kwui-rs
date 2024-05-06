@@ -31,3 +31,6 @@ build-target = "0.4.0"
 embed-resource = "2.4.1"
 kwui-cli = { path = "../kwui-cli" }
 walkdir = "2.5.0"
+
+[patch.crates-io]
+cmake = { git = "https://gitee.com/wanghoi/cmake-rs.git" }
