@@ -133,7 +133,7 @@ export function InstallDialog({
             <div id="name-version" style="text-align:center">
                 <span id="name" style="position:relative;">
                     {mainLabelText}
-                    <span id="version" style="position:absolute; left:100%; top:-10;">{version}</span>
+                    <span id="version" style="position:absolute; left:100%; top:-10; width: 50px; text-align: left;">{version}</span>
                 </span>
             </div>
             <PageStack current={current} />
