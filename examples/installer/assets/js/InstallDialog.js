@@ -244,9 +244,9 @@ button.primary:active {
 }
 #done-label {
     position: absolute;
-    left: 8;
+    left: 0;
+    right: 0;
     top: 250;
-    width: 536;
     height: 24;
     font-size: ${Theme.H3_FONT_SIZE};
     color: ${Theme.H3_TEXT_COLOR};
