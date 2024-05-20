@@ -28,15 +28,15 @@ app.showDialog({
 
 ## 快速开始
 
-- 运行示例
-  ```bash
-  git clone https://gitee.com/wanghoi/kwui-rs.git
-  cargo run --example installer
-  ```
-- 集成到您的Rust项目
-  ```bash
-  cargo add kwui
-  ```
+1. 下载代码
+```bash
+git clone https://gitee.com/wanghoi/kwui-rs.git
+```
+2. 运行示例
+```bash
+# 安装程序界面模拟
+cargo run --example installer
+```
 
 ## 特点
 
