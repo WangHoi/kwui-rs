@@ -76,14 +76,14 @@ impl Model {
         ScriptEngine::add_global_function("getChannel", Model::get_channel);
         ScriptEngine::add_global_function("reloadChannel", Model::reload_channel);
     }
-    fn reload_channel(_: ()) {
+    fn reload_channel() {
         MODEL.with_borrow_mut(|m| {
             m.channel = None;
             m.rt.as_ref().unwrap().spawn(Model::do_load_channel());
         });
         ScriptEngine::post_event1("main-dialog:channel-loaded", Channel::default());
     }
-    fn get_channel(_: ()) -> Channel {
+    fn get_channel() -> Channel {
         MODEL.with_borrow(|m| m.channel.clone().unwrap_or_default())
     }
     pub fn deinit() {

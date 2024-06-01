@@ -131,40 +131,40 @@ impl Model {
             .into();
         });
     }
-    fn get_current_page(_: ()) -> &'static str {
+    fn get_current_page() -> &'static str {
         MODEL.with_borrow(|m| m.current_page)
     }
-    fn get_target_dir(_: ()) -> TargetDir {
+    fn get_target_dir() -> TargetDir {
         TargetDir {
             dir: "C:\\".into(),
             valid: true,
         }
     }
-    fn get_free_space(_: ()) -> FreeSpace {
+    fn get_free_space() -> FreeSpace {
         FreeSpace {
             estimated_size_mb: 123,
             target_free_space_gb: 234.into(),
         }
     }
-    fn is_main_page_expanded(_: ()) -> bool {
+    fn is_main_page_expanded() -> bool {
         MODEL.with_borrow(|m| m.main_page_expanded)
     }
-    fn get_install_progress(_: ()) -> f64 {
+    fn get_install_progress() -> f64 {
         MODEL.with_borrow(|m| m.install_progress)
     }
 
-    fn on_expand_button_clicked(_: ()) {
+    fn on_expand_button_clicked() {
         MODEL.with_borrow_mut(|m| m.main_page_expanded = !m.main_page_expanded);
         ScriptEngine::post_event0("install-dialog:main-page-expanded");
     }
-    fn on_start_button_clicked(_: ()) {
+    fn on_start_button_clicked() {
         MODEL.with_borrow_mut(|m| m.current_page = "progress");
         ScriptEngine::post_event0("install-dialog:current-page-changed");
     }
-    fn on_done_button_clicked(_: ()) {
+    fn on_done_button_clicked() {
         Model::close_main_dialog();
     }
-    fn on_animation_event(_: ()) {
+    fn on_animation_event() {
         let (new_progress, notify) = MODEL.with_borrow_mut(|m| -> (f64, bool) {
             if m.current_page == "progress" {
                 if m.install_progress < 1.0 {
@@ -191,7 +191,7 @@ impl Model {
             }
         }
     }
-    fn on_request_close((_event, did): (String, String)) -> bool {
+    fn on_request_close(_event: String, did: String) -> bool {
         let (is_me, current_page) = MODEL.with_borrow(|m| (m.dialog_id == did, m.current_page));
         // eprintln!("on_request_close did={} is_me={}", did, is_me);
         if !is_me {
@@ -213,22 +213,22 @@ impl Model {
             false
         }
     }
-    fn on_enter_key_down((_event, did): ((), String)) {
+    fn on_enter_key_down(_event: String, did: String) {
         let (is_me, current_page) = MODEL.with_borrow(|m| (m.dialog_id == did, m.current_page));
         if !is_me {
             return;
         }
         if current_page == "main" {
-            Model::on_start_button_clicked(());
+            Model::on_start_button_clicked();
         } else if current_page == "done" {
-            Model::on_done_button_clicked(());
+            Model::on_done_button_clicked();
         }
     }
 
-    fn on_confirm_dialog_action_button_clicked(_: ()) {
+    fn on_confirm_dialog_action_button_clicked() {
         Model::close_confirm_dialog();
     }
-    fn on_confirm_dialog_cancel_button_clicked(_: ()) {
+    fn on_confirm_dialog_cancel_button_clicked() {
         Model::close_confirm_dialog();
         Model::close_main_dialog();        
     }

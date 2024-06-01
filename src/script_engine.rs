@@ -32,15 +32,13 @@ impl ScriptEngine {
         };
         ScriptValue::from_inner(inner)
     }
-    pub fn add_global_function<R, Fun, A>(name: &str, func: Fun)
+    pub fn add_global_function<R, Fun, Args>(name: &str, func: Fun)
     where
-        R: IntoScriptValue,
-        Fun: Fn(A) -> R + 'static,
-        A: ScriptFuntionParams,
+        Fun: ScriptFunction<R, Args> + 'static,
     {
         let name = CString::new(name).unwrap();
-        let closure: Box<Callback> = Box::new(Box::new(move |args| -> Result<ScriptValue, ()> {
-            func(A::from_params(args)?).into_script_value()
+        let closure: Box<Callback> = Box::new(Box::new(move |params| -> Result<ScriptValue, ()> {
+            func.invoke(params)
         }) as Callback);
         unsafe {
             kwui_ScriptEngine_addGlobalFunction(
@@ -56,17 +54,16 @@ impl ScriptEngine {
             kwui_ScriptEngine_removeGlobalFunction(name.as_ptr());
         }
     }
-    pub fn add_event_listener<R, Fun, A>(event: &str, func: Fun) -> ScriptEventHandler
+    pub fn add_event_listener<R, Fun, Args>(event: &str, func: Fun) -> ScriptEventHandler
     where
         R: IntoScriptValue,
-        Fun: Fn(A) -> R + 'static,
-        A: ScriptFuntionParams,
+        Fun: ScriptFunction<R, Args> + 'static,
     {
         let c_event = CString::new(event).unwrap();
         let e = event.to_string();
         let closure: Box<Callback> = Box::new(Box::new(
             move |args: &[ScriptValue]| -> Result<ScriptValue, ()> {
-                func(A::from_params(args)?).into_script_value()
+                func.invoke(args)
             },
         ) as Callback);
         let inner = Box::into_raw(closure) as _;
@@ -168,6 +165,35 @@ impl_script_function_param!(A1, A2, A3, A4, A5, A6);
 impl_script_function_param!(A1, A2, A3, A4, A5, A6, A7);
 impl_script_function_param!(A1, A2, A3, A4, A5, A6, A7, A8);
 
+pub trait ScriptFunction<R, Args> {
+    fn invoke(&self, params: &[ScriptValue]) -> Result<ScriptValue, ()>;
+}
+macro_rules! impl_script_function {
+    ($($arg:ident),*) => {
+        #[allow(non_snake_case)]
+        impl<Fun, R, $($arg,)*> ScriptFunction<R, ($($arg,)*)> for Fun
+        where
+            R: IntoScriptValue,
+            ($($arg,)*): ScriptFuntionParams,
+            Fun: Fn($($arg),*) -> R,
+        {
+            fn invoke(&self, params: &[ScriptValue]) -> Result<ScriptValue, ()> {
+                let ($($arg,)*) = ScriptFuntionParams::from_params(params)?;
+                self($($arg,)*).into_script_value()
+            }
+        }
+    };
+}
+impl_script_function!();
+impl_script_function!(A1);
+impl_script_function!(A1, A2);
+impl_script_function!(A1, A2, A3);
+impl_script_function!(A1, A2, A3, A4);
+impl_script_function!(A1, A2, A3, A4, A5);
+impl_script_function!(A1, A2, A3, A4, A5, A6);
+impl_script_function!(A1, A2, A3, A4, A5, A6, A7);
+impl_script_function!(A1, A2, A3, A4, A5, A6, A7, A8);
+
 unsafe extern "C" fn invoke_closure(
     argc: ::std::os::raw::c_int,
     argv: *mut *mut kwui_ScriptValue,
@@ -198,15 +224,15 @@ mod tests {
     use super::*;
     use crate::Application;
 
-    fn f0(_: ()) {
+    fn f0() {
         eprintln!("f0 called");
     }
 
-    fn f1(args: (String, u8, f32)) {
-        eprintln!("f1 called with {:?}", args);
+    fn f1(arg0: String, arg1:f32) {
+        eprintln!("f1 called with {:?} {:?}", arg0, arg1);
     }
 
-    fn on_test_event((evt, arg): (String, f32)) {
+    fn on_test_event(evt: String, arg: f32) {
         eprintln!("on_test_event evt={}, arg={}", evt, arg);
     }
 
@@ -217,10 +243,10 @@ mod tests {
         ScriptEngine::call_global_function("f0", &[]);
 
         ScriptEngine::add_global_function("f1", f1);
-        ScriptEngine::call_global_function("f1", &make_args!("a", 2, 3));
+        ScriptEngine::call_global_function("f1", &make_args!("a", 2));
 
         let a = on_test_event as *const ();
         let _handler = ScriptEngine::add_event_listener("test-event", on_test_event);
-        ScriptEngine::post_event1("test-event", true);
+        ScriptEngine::post_event1("test-event", 1.23);
     }
 }
