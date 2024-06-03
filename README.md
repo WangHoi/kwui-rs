@@ -1,12 +1,14 @@
 <div align="center">
 <img src="https://gitee.com/wanghoi/kwui/raw/master/icon.svg" height="140px" />
 
-# kwui
+# kwui-rs
 
-使用 JSX、CSS 构建简单的桌面应用。 
+A small user interface library for daily use.
+Build utility Gui tool with `JSX`、`CSS` and `Rust`.
 
 </div>
 
+## Hello world
 
 ```javascript
 import { useState } from "Keact";
@@ -26,55 +28,46 @@ app.showDialog({
 });
 ```
 
-## 快速开始
+## Quick Start
 
-1. 下载代码
+1. Fetch source code
 ```bash
 git clone https://gitee.com/wanghoi/kwui-rs.git
 ```
-2. 运行示例
+2a. Run Win32 example
 ```bash
-# 安装程序界面模拟
-cargo run --example installer
+# Run the mock installer 
+cargo run -p installer
+```
+2b. Or build Android example
+```bash
+# Build the mock installer 
+cmake --preset android-debug
+cmake --build --preset android-debug --target installer.APK
 ```
 
-## 特点
+## Gallery
 
-- 简单实用
-  - 适合快速开发，支持热重载
-  - 易于使用Rust语言开发业务逻辑
-  - 小巧无第三方依赖
-- 兼容性好
-  - 基于Direct2D实现GPU加速，电脑配置过低、GPU不可用时回落到软件渲染
-  - 在生产环境，成千上万台电脑上使用
-  - 优秀的多显示器与DPI缩放支持
-- 脚本驱动：
-  - 基于QuickJS扩展，原生JSX支持，i18n支持
-  - 类似React Hooks的组件生命周期处理
-- 布局功能丰富，样式美观
-  - 符合 CSS 2.2 标准的排版与样式
-  - 强大的图文混排，富文本支持
-  - 中文输入法支持
-- 易于扩展
-  - 为原生渲染场景，如视频渲染做了优化
-  - 支持JavaScript，C++，Rust编写业务逻辑
-  - 支持C++扩展DOM，处理原生事件和渲染
+### VoIP QoE tool
+![image](docs/VoIPTool.png)
 
-## 样例展示
+### Remote Desktop
+![image](docs/KuDesk.jpg)
 
-### 远程桌面客户端
-![image](https://gitee.com/wanghoi/kwui/raw/master/docs/KuDesk.jpg)
+### Installer
+![image](docs/installer.png)
+![image](docs/installer-android.jpg)
 
-## 常见问题
+### Richtext
+![image](docs/richtext-android.jpg)
 
-1. 已经有很多界面库了，为什么还要重复造轮子？
-   
-    为了解决工作中的问题：
-    - 开发安装程序，需要界面美观，为了国际化需要自适应布局。
-    - 多进程重构，需要UI代码编写一次，处处复用。
-    - 音视频开发，需要便于C++扩展。
-    - 业务逻辑使用Rust语言开发，需要为其提供界面。
 
-    因为有趣：
-    - 学习浏览器标准。
-    - 学习Flutter, Electron, AWTK。
+## Documentation
+- [TODO: API Reference](https://github.com/wanghoi/kwui-rs/wikis)
+
+## FAQ
+
+1. Why another GUI library?
+- Porting server-side Rust code to client-side quickly, to explore and evaluate new technology.
+- Explore end-to-end and server-relay audio and video transport technology.
+- Explore SDWAN technology.
