@@ -1,10 +1,11 @@
 <div align="center">
-<img src="https://gitee.com/wanghoi/kwui/raw/master/icon.svg" height="140px" />
+<img src="docs/icon.svg" height="140px" />
 
 # kwui-rs
 
 A small user interface library for daily use.
-Build utility Gui tool with `JSX`、`CSS` and `Rust`.
+Build utility Gui tool with `JSX`、`CSS` and `Rust`,
+at present it is mainly supported Windows, Android and OpenHarmony support is on the way.
 
 </div>
 
@@ -28,27 +29,9 @@ app.showDialog({
 });
 ```
 
-## Quick Start
-
-1. Fetch source code
-```bash
-git clone https://gitee.com/wanghoi/kwui-rs.git
-```
-2a. Run Win32 example
-```bash
-# Run the mock installer 
-cargo run -p installer
-```
-2b. Or build Android example
-```bash
-# Build the mock installer 
-cmake --preset android-debug
-cmake --build --preset android-debug --target installer.APK
-```
-
 ## Gallery
 
-### VoIP QoE tool
+### VoIP Test tool
 ![image](docs/VoIPTool.png)
 
 ### Remote Desktop
@@ -56,11 +39,33 @@ cmake --build --preset android-debug --target installer.APK
 
 ### Installer
 ![image](docs/installer.png)
+
+### Android examples
+![image](docs/richtext-android.jpg)
 ![image](docs/installer-android.jpg)
 
-### Richtext
-![image](docs/richtext-android.jpg)
+## Quick Start
 
+1. Fetch source code
+```bash
+git clone --recurse-submodules https://github.com/wanghoi/kwui-rs.git
+```
+2a. Run Win32 example
+```bash
+# Run the mock installer 
+cargo run -p installer
+```
+2b. Or build Android example apk
+```bash
+# Setup Android development environment, Eg:
+set ANDROID_HOME=D:/Android/Sdk
+set ANDROID_NDK_HOME=D:/Android/Sdk/ndk/27.0.11718014
+set CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=%ANDROID_NDK_HOME%/toolchains/llvm/prebuilt/windows-x86_64/bin/aarch64-linux-android30-clang.cmd
+
+# Build the mock installer 
+cmake --preset android-debug
+cmake --build --preset android-debug --target installer.APK
+```
 
 ## Documentation
 - [TODO: API Reference](https://github.com/wanghoi/kwui-rs/wikis)
