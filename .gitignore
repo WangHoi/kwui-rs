@@ -43,3 +43,5 @@
 /kwui-sys/target
 
 /examples/*/assets.ar
+
+.idea
