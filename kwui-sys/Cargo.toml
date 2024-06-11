@@ -18,7 +18,7 @@ path = "src/lib.rs"
 [build-dependencies]
 bindgen = "0.69.4"
 build-target = "0.4.0"
-cmake = { git = "https://gitee.com/wanghoi/cmake-rs.git" }
+cc = "1.0.99"
 flate2 = "1.0.30"
 heck = "0.5.0"
 regex = "1.10.4"

@@ -7,3 +7,4 @@ pub mod clang;
 pub mod features;
 pub mod platform;
 pub mod kwui;
+mod cmake;

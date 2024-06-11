@@ -9,7 +9,7 @@ use std::{
     path::{Path, PathBuf},
     process::{Command, Stdio},
 };
-use cmake::Config;
+use super::super::cmake::Config;
 
 /// The build configuration for Skia.
 #[derive(Clone, PartialEq, Eq, Debug)]

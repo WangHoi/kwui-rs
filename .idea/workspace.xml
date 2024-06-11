@@ -8,8 +8,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="090968b5-80ca-4e27-98c8-645ffcabf928" name="Changes" comment="update submodule">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/kwui-rs.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kwui-rs.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,7 +123,7 @@
       <workItem from="1717772982922" duration="2928000" />
       <workItem from="1717986002762" duration="15598000" />
       <workItem from="1718107496718" duration="916000" />
-      <workItem from="1718109655462" duration="1496000" />
+      <workItem from="1718109655462" duration="2473000" />
     </task>
     <task id="LOCAL-00001" summary="build: add binary cache">
       <option name="closed" value="true" />
