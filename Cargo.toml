@@ -1,5 +1,5 @@
 [workspace]
-members = ["examples/installer", "examples/rss_reader", "kwui-sys"]
+members = ["examples/installer", "examples/rss_reader", "kwui-sys", "kwui-cli"]
 
 [workspace.package]
 version = "0.2.0"
@@ -8,8 +8,8 @@ edition = "2021"
 
 [package]
 name = "kwui"
-version = {workspace = true}
-edition = {workspace = true}
+version = { workspace = true }
+edition = { workspace = true }
 description = "A GUI library with JSX/CSS support"
 # publish = ["crates-io"]
 license = { workspace = true }
@@ -34,7 +34,7 @@ kwui-sys = { version = "^0.2.0", path = "kwui-sys" }
 [build-dependencies]
 build-target = "0.4.0"
 embed-resource = "2.4.1"
-kwui-cli = { path = "../kwui-cli" }
+kwui-cli = { path = "kwui-cli" }
 walkdir = "2.5.0"
 
 [patch.crates-io]
