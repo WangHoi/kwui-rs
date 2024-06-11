@@ -10,6 +10,7 @@ keywords = ["graphics", "gui", "widgets", "jsx", "quickjs"]
 categories = ["gui", "api-bindings"]
 repository = "https://github.com/wanghoi/kwui-rs/"
 readme = "../README.md"
+exclude = ["/deps/kwui"]
 
 [lib]
 name = "kwui_sys"
