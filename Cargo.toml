@@ -34,7 +34,7 @@ kwui-sys = { version = "^0.2.0", path = "kwui-sys" }
 [build-dependencies]
 build-target = "0.4.0"
 embed-resource = "2.4.1"
-kwui-cli = { path = "kwui-cli" }
+kwui-cli = { version = "^0.2.0", path = "kwui-cli" }
 walkdir = "2.5.0"
 
 [patch.crates-io]
