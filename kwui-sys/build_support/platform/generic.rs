@@ -20,7 +20,7 @@ pub fn gn_args(config: &BuildConfiguration, builder: &mut CMakeArgsBuilder) {
     builder.target_os_and_default_cpu(&config.target.system);
 }
 
-pub fn link_libraries(features: &Features) -> Vec<String> {
+pub fn link_libraries(_features: &Features) -> Vec<String> {
     Vec::new()
     /*
     if features.gl {

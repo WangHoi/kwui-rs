@@ -9,7 +9,7 @@ impl PlatformDetails for Msvc {
         false
     }
 
-    fn cmake_args(&self, config: &BuildConfiguration, builder: &mut CMakeArgsBuilder) {
+    fn cmake_args(&self, _config: &BuildConfiguration, _builder: &mut CMakeArgsBuilder) {
         /*
         if let Some(win_vc) = resolve_vc() {
             builder.arg(
@@ -84,7 +84,7 @@ impl PlatformDetails for Generic {
     }
 }
 
-fn generic_link_libraries(features: &Features) -> Vec<String> {
+fn generic_link_libraries(_features: &Features) -> Vec<String> {
     let mut libs = vec!["usp10", "ole32", "user32", "gdi32", "fontsub"];
     /*
     if features.gl {
@@ -102,6 +102,7 @@ fn generic_link_libraries(features: &Features) -> Vec<String> {
 
 /// Visual Studio VC detection support
 /// TODO: sophisticate: <https://github.com/alexcrichton/cc-rs/blob/master/src/windows_registry.rs0>
+#[allow(unused)]
 fn resolve_vc() -> Option<PathBuf> {
     if let Some(install_dir) = cargo::env_var("VCINSTALLDIR") {
         // vcvars.bat may end up setting VCINSTALLDIR to a path with trailing backslash, we
@@ -131,6 +132,7 @@ mod llvm {
     ///   - C:\Program Files\LLVM
     ///   - C:\LLVM
     ///   - %USERPROFILE%\scoop\apps\llvm\current
+    #[allow(unused)]
     pub fn find_home() -> Option<String> {
         if let Some(llvm_home) = cargo::env_var("LLVM_HOME") {
             validate_home(&llvm_home)
@@ -156,6 +158,7 @@ mod llvm {
 
     /// Return the clang's highest version directory by scanning the directories in
     /// `LLVM_HOME\lib\clang\*`.
+    #[allow(unused)]
     pub fn clang_version_dir(home: &str) -> Option<String> {
         let path: PathBuf = [home, "lib", "clang"].into_iter().collect();
         let mut highest_version = None;
@@ -176,12 +179,14 @@ mod llvm {
         Some(path.to_str()?.to_string())
     }
 
+    #[allow(unused)]
     fn validate_home(home: &str) -> Option<String> {
         let clang_cl: PathBuf = [home, "bin", "clang-cl.exe"].into_iter().collect();
         eprintln!("Checking for {clang_cl:?}");
         clang_cl.exists().then(|| home.to_string())
     }
 
+    #[allow(unused)]
     fn parse_version(s: &str) -> Option<(usize, usize, usize)> {
         let v: Result<Vec<_>, _> = s.split('.').map(|s| s.parse()).collect();
         let v = v.ok()?;

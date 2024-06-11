@@ -1,15 +1,12 @@
 mod build_support;
 
 use bindgen;
-use cmake::{self, Config};
-use std::path::PathBuf;
-use build_target;
 use build_support::{
     binaries_config,
     cargo::{self, Target},
     features, kwui,
 };
-use std::{fs, io};
+use std::io;
 
 fn main() -> Result<(), io::Error> {
     if env::is_docs_rs_build() {
@@ -146,7 +143,7 @@ fn generate_bindings(
     // features: &features::Features,
     // definitions: Vec<skia_bindgen::Definition>,
     binaries_config: &binaries_config::BinariesConfiguration,
-    kwui_source_dir: &std::path::Path,
+    _kwui_source_dir: &std::path::Path,
     target: Target,
     // sysroot: Option<&str>,
 ) {
@@ -233,7 +230,7 @@ mod env {
         matches!(cargo::env_var("DOCS_RS"), Some(v) if v != "0")
     }
 }
-
+/*
 fn old_main() {
     let cmake_project_dir = "deps/kwui";
     // println!("cargo:rerun-if-changed={}/cmake", cmake_project_dir);
@@ -283,6 +280,7 @@ fn old_main() {
 }
 
 #[cfg(target_feature = "crt-static")]
+
 fn crt_static() -> bool {
     true
 }
@@ -333,3 +331,4 @@ fn cmake_config_android(cmake_project_dir: &str) -> PathBuf {
     println!("cargo:root={}", dst.display());
     dst
 }
+*/

@@ -13,6 +13,7 @@ pub mod android;
 mod generic;
 mod windows;
 
+#[allow(unused)]
 pub fn uses_freetype(config: &BuildConfiguration) -> bool {
     details(&config.target).uses_freetype(config)
 }
@@ -28,7 +29,7 @@ pub struct BindgenAndCCArgs {
     pub target_override: Option<String>,
 }
 
-pub fn bindgen_and_cc_args(target: &Target, sysroot: Option<&str>) -> BindgenAndCCArgs {
+pub fn _bindgen_and_cc_args(target: &Target, sysroot: Option<&str>) -> BindgenAndCCArgs {
     let mut builder = BindgenArgsBuilder::new(sysroot);
     details(target).bindgen_args(target, &mut builder);
     builder.into_bindgen_and_cc_args()
@@ -46,6 +47,7 @@ pub fn filter_features(
     details(target).filter_platform_features(use_system_libraries, features)
 }
 
+#[allow(unused)]
 pub trait PlatformDetails {
     /// We need this information relatively early on to help parameterizing GN.
     fn uses_freetype(&self, _config: &BuildConfiguration) -> bool;
@@ -95,7 +97,7 @@ impl CMakeArgsBuilder {
     }
 
     /// Overwrite the default target.
-    pub fn target(&mut self, target: impl Into<Option<String>>) {
+    pub fn _target(&mut self, target: impl Into<Option<String>>) {
         self.target_str = target.into();
     }
 
@@ -172,6 +174,7 @@ pub struct BindgenArgsBuilder {
     target_override: Option<String>,
 }
 
+#[allow(unused)]
 impl BindgenArgsBuilder {
     pub fn new(sysroot: Option<&str>) -> Self {
         Self {

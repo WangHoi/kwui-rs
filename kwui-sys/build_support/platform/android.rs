@@ -52,8 +52,8 @@ impl PlatformDetails for Android {
 
     fn filter_platform_features(
         &self,
-        use_system_libraries: bool,
-        mut features: Features,
+        _use_system_libraries: bool,
+        features: Features,
     ) -> Features {
         /*
         if !features.embed_freetype {
@@ -136,8 +136,8 @@ pub fn extra_skia_cflags() -> Vec<String> {
     vec![format!("-D__ANDROID_API__={API_LEVEL}")]
 }
 
-pub fn link_libraries(features: &Features) -> Vec<&str> {
-    let mut libs = vec!["log", "android", "c++_shared", "c++abi"];
+pub fn link_libraries(_features: &Features) -> Vec<&str> {
+    let libs = vec!["log", "android", "c++_shared", "c++abi"];
     /*
     if features.gl {
         libs.extend(vec!["EGL", "GLESv2"])

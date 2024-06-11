@@ -246,6 +246,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2bd12c1caf447e69cd4528f47f94d203fd2582878ecb9e9465484c4148a8223"
 
 [[package]]
+name = "cargo_toml"
+version = "0.20.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8cb1d556b8b8f36e5ca74938008be3ac102f5dcb5b68a0477e4249ae2291cd3"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "cc"
 version = "1.0.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -932,7 +942,7 @@ dependencies = [
 
 [[package]]
 name = "kwui"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "build-target",
  "embed-resource",
@@ -944,25 +954,29 @@ dependencies = [
 
 [[package]]
 name = "kwui-cli"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "bindgen 0.69.4",
  "byteorder",
+ "cargo_toml",
  "clap",
  "cmake",
+ "flate2",
  "itertools",
  "lzf",
  "num_enum",
  "path-clean",
  "sha1",
  "size",
+ "tar",
+ "toml",
  "walkdir",
 ]
 
 [[package]]
 name = "kwui-sys"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "bindgen 0.69.4",
  "build-target",

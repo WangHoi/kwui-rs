@@ -7,7 +7,7 @@ use std::{
 };
 
 // pub const KWUI_OUTPUT_DIR: &str = "skia";
-const ICUDTL_DAT: &str = "icudtl.dat";
+// const ICUDTL_DAT: &str = "icudtl.dat";
 
 /// The libraries to link with.
 pub mod lib {
@@ -57,9 +57,9 @@ impl BinariesConfiguration {
         let target = cargo::target();
 
         let mut ninja_built_libraries = Vec::new();
-        let mut binding_libraries = Vec::new();
+        let binding_libraries = Vec::new();
         let binding_files = vec!["bindings.rs".into()];
-        let mut additional_files = Vec::new();
+        let additional_files = Vec::new();
         let feature_ids = features.ids();
         /*
         if features.text_layout {
@@ -120,7 +120,7 @@ impl BinariesConfiguration {
         // On Linux, the order is significant, first the static libraries we built, and then
         // the system libraries.
 
-        let target = cargo::target();
+        let _target = cargo::target();
 
         cargo::add_link_libs(self.built_libraries(true));
         cargo::add_link_libs(&self.link_libraries);

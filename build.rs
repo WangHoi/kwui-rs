@@ -1,4 +1,5 @@
 use build_target;
+#[allow(unused_imports)]
 use embed_resource;
 use kwui_cli;
 use walkdir::WalkDir;

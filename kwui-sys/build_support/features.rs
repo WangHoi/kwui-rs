@@ -82,7 +82,7 @@ impl Features {
 
     /// Feature Ids used to look up prebuilt binaries.
     pub fn ids(&self) -> HashSet<&str> {
-        let mut feature_ids = Vec::new();
+        let feature_ids = Vec::new();
         /*
         if self.gl {
             feature_ids.push(feature_id::GL);
