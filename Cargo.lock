@@ -939,7 +939,7 @@ dependencies = [
 
 [[package]]
 name = "kwui"
-version = "0.2.0-beta.1"
+version = "0.2.0-beta.2"
 dependencies = [
  "build-target",
  "embed-resource",
@@ -951,7 +951,7 @@ dependencies = [
 
 [[package]]
 name = "kwui-cli"
-version = "0.2.0-beta.1"
+version = "0.2.0-beta.2"
 dependencies = [
  "anyhow",
  "bindgen 0.69.4",
@@ -973,7 +973,7 @@ dependencies = [
 
 [[package]]
 name = "kwui-sys"
-version = "0.2.0-beta.1"
+version = "0.2.0-beta.2"
 dependencies = [
  "bindgen 0.69.4",
  "build-target",
