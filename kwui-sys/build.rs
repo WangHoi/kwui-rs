@@ -111,6 +111,8 @@ fn main() -> Result<(), io::Error> {
         build_support::binary_cache::publish(&binaries_config, &staging_directory);
     }
 
+    println!("cargo:root={}", std::env::var("OUT_DIR").unwrap());
+
     Ok(())
 }
 
