@@ -23,18 +23,19 @@ fn pack_examples_resources() {
         .into_iter()
         .filter_entry(|e| e.file_type().is_dir() && e.file_name() == "assets")
     {
-        let entry = entry.unwrap();
-        let base_dir = entry.path().parent().unwrap();
-        let output_file = format!("{}/assets.ar", base_dir.display());
-        let input_item = kwui_cli::PackInput::DirMapping {
-            src: entry.path().to_string_lossy().to_string(),
-            dst: "/".to_string(),
-        };
-        if let Err(_) = kwui_cli::pack(&output_file, &[input_item]) {
-            println!(
-                "cargo:warning=pack assets resource for {} failed",
-                base_dir.file_stem().unwrap_or_default().to_string_lossy()
-            );
+        if let Ok(entry) = entry {
+            let base_dir = entry.path().parent().unwrap();
+            let output_file = format!("{}/assets.ar", base_dir.display());
+            let input_item = kwui_cli::PackInput::DirMapping {
+                src: entry.path().to_string_lossy().to_string(),
+                dst: "/".to_string(),
+            };
+            if let Err(_) = kwui_cli::pack(&output_file, &[input_item]) {
+                println!(
+                    "cargo:warning=pack assets resource for {} failed",
+                    base_dir.file_stem().unwrap_or_default().to_string_lossy()
+                );
+            }
         }
     }
 }
