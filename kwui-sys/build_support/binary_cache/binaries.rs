@@ -118,16 +118,6 @@ pub fn unpack(archive: impl Read, output_directory: &Path) -> io::Result<()> {
     let tar = GzDecoder::new(archive);
     // note: this creates the skia-bindings/ directory.
     tar::Archive::new(tar).unpack(output_directory)?;
-    let binaries_dir = output_directory.join(ARCHIVE_NAME);
-    let paths: Vec<PathBuf> = fs::read_dir(binaries_dir)?
-        .map(|e| e.unwrap().path())
-        .collect();
 
-    // pull out all nested files.
-    for path in paths {
-        let name = path.file_name().unwrap();
-        let target_path = output_directory.join(name);
-        fs::rename(path, target_path)?
-    }
     Ok(())
 }

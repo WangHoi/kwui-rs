@@ -22,9 +22,11 @@ hyper = { version = "0.14", default-features = false, features = ["http1", "clie
 hyper-boring = "4.6.0"
 boring = "4.6.0"
 
-# [target.'cfg(target_os = "android")'.dependencies]
-# reqwest = { version = "0.12.4", default-features = false, features = ["json", "rustls-tls"] }
-
 [target.'cfg(not(target_os = "android"))'.dependencies]
-# reqwest = { version = "0.12.4" }
 windows_dpi = "0.3.0"
+
+[build-dependencies]
+build-target = "0.4.0"
+embed-resource = "2.4.1"
+kwui-cli = { workspace = true }
+walkdir = "2.5.0"

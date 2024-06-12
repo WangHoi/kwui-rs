@@ -10,7 +10,7 @@ project(kwui-rs)
 if(ANDROID)
     set(KWUI_SYS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/kwui-sys/deps/kwui)
     include(${KWUI_SYS_DIR}/cmake/AndroidPackaging-Prerequisites.cmake)
-    include(${KWUI_SYS_DIR}/cmake/AndroidPackaging.cmake)
+    include(${KWUI_SYS_DIR}/cmake/AndroidPackaging-Rust.cmake)
 
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/AndroidPackaging.cmake)
 

@@ -63,7 +63,7 @@ fn package(staging_dir: &PathBuf) -> anyhow::Result<()> {
     let tar_gz = File::create(&out_filename)?;
     let enc = GzEncoder::new(tar_gz, Compression::default());
     let mut tar = Builder::new(enc);
-    tar.append_dir_all(KWUI_BINARIES, staging_dir.join(KWUI_BINARIES))?;
+    tar.append_dir_all(".", staging_dir.join(KWUI_BINARIES))?;
     tar.finish()?;
 
     println!("Done, output file [{}]", out_filename);

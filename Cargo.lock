@@ -1458,11 +1458,15 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "boring",
+ "build-target",
+ "embed-resource",
  "hyper",
  "hyper-boring",
  "kwui",
+ "kwui-cli",
  "rss",
  "tokio",
+ "walkdir",
  "windows_dpi",
 ]
 

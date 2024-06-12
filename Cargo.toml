@@ -6,6 +6,9 @@ version = "0.2.0-beta.3"
 license = "LGPL-3.0-or-later"
 edition = "2021"
 
+[workspace.dependencies]
+kwui-cli = { version = "0.2.0-beta.3", path = "kwui-cli" }
+
 [package]
 name = "kwui"
 version = { workspace = true }
