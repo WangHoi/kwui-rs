@@ -187,23 +187,25 @@ fn should_try_download_binaries(
     force: bool,
 ) -> Option<(String, String)> {
     let tag = cargo::package_version();
-    println!("!! should_try_download_binaries tag {}", tag);
 
     // For testing:
     if force {
         // Retrieve the hash from the repository above.
-        let half_hash = git::half_hash()?;
-        return Some((tag, config.key(&half_hash)));
+        if let Some(half_hash) = git::half_hash() {
+            return Some((tag, config.key(&half_hash)));
+        } else if let Ok(ref full_hash) = cargo::crate_repository_hash() {
+            let half_hash = git::trim_hash(full_hash);
+            return Some((tag, config.key(&half_hash)));
+        } else {
+            panic!("FORCE DOWNLOAD: FAILED TO RESOLVE TAG AND KEY");
+        }
     }
 
     // Building inside a crate?
     if let Ok(ref full_hash) = cargo::crate_repository_hash() {
-        println!("!! should_try_download_binaries full_hash {}", full_hash);
         let half_hash = git::trim_hash(full_hash);
         return Some((tag, config.key(&half_hash)));
     }
-
-    println!("!! should_try_download_binaries not hash");
 
     None
 }
