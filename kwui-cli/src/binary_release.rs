@@ -57,7 +57,7 @@ const KWUI_BINARIES: &'static str = "kwui-binaries";
 
 fn package(staging_dir: &PathBuf) -> anyhow::Result<()> {
     let (tag, key) = parse_tag_key(staging_dir)?;
-    let out_filename = format!("{}-{}-{}.tar.gz", KWUI_BINARIES, tag, key);
+    let out_filename = format!("{}-{}.tar.gz", KWUI_BINARIES, key);
     let tar_gz = File::create(&out_filename)?;
     let enc = GzEncoder::new(tar_gz, Compression::default());
     let mut tar = Builder::new(enc);
