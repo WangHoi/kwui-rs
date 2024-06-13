@@ -1,16 +1,18 @@
 #![allow(unused, dead_code)]
 
-mod file_format;
-mod packager;
-mod binary_release;
-mod new;
+pub mod file_format;
+pub mod packager;
+pub mod binary_release;
+pub mod template_release;
+pub mod new;
 
 use itertools::Itertools;
-use packager::PackItem;
 use path_clean;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
+use cargo_toml::Manifest;
 
-pub use packager::{list, unpack};
+pub use packager::{list, unpack, PackItem};
 
 pub enum PackInput {
     SourceFile { src: String },
@@ -142,4 +144,30 @@ fn scan_dir(dir: &Path, dst: &str) -> anyhow::Result<(Vec<PackItem>, Vec<String>
         }
     }
     Ok((file_items, dir_items))
+}
+
+pub fn check_source_dir(source_dir: &PathBuf) -> anyhow::Result<()> {
+    let manifest = Manifest::from_path(source_dir.join("Cargo.toml"))
+        .map_err(|e| {
+            eprintln!("Load Cargo.toml error: {}", e);
+            e
+        })?;
+    if let Some(ws) = manifest.workspace {
+        if ws.members.contains(&String::from("kwui-sys")) {
+            return Ok(());
+        }
+    }
+    anyhow::bail!("Invalid source_dir {}", source_dir.display())
+}
+
+pub fn git_half_hash() -> Option<String> {
+    let mut cmd = Command::new("git");
+    cmd.arg("rev-parse").arg("--short=20");
+    let output = cmd.arg("HEAD").stderr(Stdio::inherit()).output().ok()?;
+    if output.status.code() != Some(0) {
+        None
+    } else {
+        // need to trim the string to remove newlines at the end.
+        Some(String::from_utf8(output.stdout).unwrap().trim().to_string())
+    }
 }

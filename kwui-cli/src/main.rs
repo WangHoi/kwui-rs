@@ -1,15 +1,9 @@
 #![allow(unused, dead_code)]
 
-mod file_format;
-mod packager;
-mod binary_release;
-mod new;
-
-use crate::packager::*;
 use anyhow;
 use clap::{Parser, Subcommand};
 use itertools::Itertools;
-use kwui_cli::{self, PackInput};
+use kwui_cli::{self, git_half_hash, PackInput, PackItem};
 use path_clean;
 use std::{
     fmt::format,
@@ -42,6 +36,15 @@ enum Commands {
     BinaryRelease {
         source_dir: PathBuf,
     },
+    TemplateRelease {
+        #[arg(long)]
+        key: Option<String>,
+
+        source_dir: PathBuf,
+    },
+    New {
+        project_name: String,
+    }
 }
 
 fn main() -> anyhow::Result<()> {
@@ -124,15 +127,23 @@ fn main() -> anyhow::Result<()> {
         } => {
             let target_dir = target_dir.unwrap_or(current_dir.to_string_lossy().to_string());
             let target_dir = std::fs::canonicalize(&target_dir)?;
-            packager::unpack(input_file, target_dir)?;
+            kwui_cli::packager::unpack(input_file, target_dir)?;
         }
         Commands::ListArchive {
             input_file,
         } => {
-            packager::list(input_file)?;
+            kwui_cli::packager::list(input_file)?;
         }
         Commands::BinaryRelease { source_dir } => {
-            binary_release::build_and_package(source_dir)?;
+            kwui_cli::binary_release::build_and_package(&source_dir)?;
+        }
+        Commands::TemplateRelease { source_dir, key } => {
+            let key = key.unwrap_or_else(|| git_half_hash().unwrap_or(String::from("unknown")));
+            kwui_cli::template_release::package(&source_dir, &key)?;
+        }
+        Commands::New { project_name } => {
+            let output_dir = std::env::current_dir()?.join(&project_name);
+            kwui_cli::new::new_project(&output_dir, "app", &project_name)?;
         }
     }
     Ok(())
@@ -167,7 +178,7 @@ fn scan_dir(dir: &Path, dst: &str) -> anyhow::Result<(Vec<PackItem>, Vec<String>
             dir_items.push(dst);
         } else if meta.is_file() {
             println!("scan_dir, add file [{}]:[{}]", full_path, dst);
-            file_items.push(PackItem {
+            file_items.push(kwui_cli::PackItem {
                 src: full_path.to_string(),
                 dst,
             });

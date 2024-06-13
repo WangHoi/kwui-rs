@@ -6,15 +6,16 @@ use flate2::write::GzEncoder;
 use tar::Builder;
 use std::io::{BufRead, BufReader};
 use cargo_toml::Manifest;
+use crate::check_source_dir;
 
 const TARGETS: &[&'static str] = &[
     "x86_64-pc-windows-msvc",
     "aarch64-linux-android",
 ];
 
-pub fn build_and_package(source_dir: PathBuf) -> anyhow::Result<()> {
+pub fn build_and_package(source_dir: &PathBuf) -> anyhow::Result<()> {
     for tgt in TARGETS.iter() {
-        build_and_package_target(&source_dir, *tgt)?;
+        build_and_package_target(source_dir, *tgt)?;
     }
     Ok(())
 }
@@ -85,18 +86,4 @@ fn parse_tag_key(staging_dir: &PathBuf) -> anyhow::Result<(String, String)> {
     drop(key_file);
 
     Ok((tag, key))
-}
-
-fn check_source_dir(source_dir: &PathBuf) -> anyhow::Result<()> {
-    let manifest = Manifest::from_path(source_dir.join("Cargo.toml"))
-        .map_err(|e| {
-            eprintln!("Load Cargo.toml error: {}", e);
-            e
-        })?;
-    if let Some(ws) = manifest.workspace {
-        if ws.members.contains(&String::from("kwui-sys")) {
-            return Ok(());
-        }
-    }
-    anyhow::bail!("Invalid source_dir {}", source_dir.display())
 }
