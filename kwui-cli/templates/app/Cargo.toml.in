@@ -1,0 +1,22 @@
+[package]
+name = "@ANDROID_PACKAGE_NAME@"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["lib", "cdylib"]
+path = "src/lib.rs"
+
+[[bin]]
+name = "@ANDROID_PACKAGE_NAME@_runner"
+path = "src/main.rs"
+
+[dependencies]
+kwui = "@KWUI_TEMPLATES_TAG@"
+kwui-sys = "@KWUI_TEMPLATES_TAG@"
+windows_dpi = "0.3.0"
+
+[build-dependencies]
+build-target = "0.4.0"
+embed-resource = "2.4.2"
+kwui-cli = "@KWUI_TEMPLATES_TAG@"

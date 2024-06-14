@@ -1,0 +1,10 @@
+#![cfg_attr(
+    all(target_os = "windows", not(test), not(debug_assertions)),
+    windows_subsystem = "windows"
+)]
+
+use @ANDROID_PACKAGE_NAME@;
+
+fn main() {
+    @ANDROID_PACKAGE_NAME@::main_entry();
+}

@@ -12,16 +12,20 @@ pub fn package(source_dir: &PathBuf, key: &str) -> anyhow::Result<()> {
     check_source_dir(source_dir)?;
 
     let cpp_android_template_dir = source_dir.join("kwui-sys/deps/kwui/cmake/AndroidPackaging.template");
-    let template_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("templates/app");
+    let kwui_android_template_dir = source_dir.join("kwui-sys/deps/kwui/android/kwui");
+    let app_template_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("templates/app");
 
     let out_filename = format!("{}-{}.tar.gz", KWUI_TEMPLATES, key);
     let tar_gz = File::create(&out_filename)?;
     let enc = GzEncoder::new(tar_gz, Compression::default());
     let mut tar = Builder::new(enc);
 
-    tar.append_dir_all("app", template_dir)?;
+    tar.append_dir_all("app", app_template_dir)?;
     tar.append_dir_all("app/android", cpp_android_template_dir)?;
+    tar.append_dir_all("app/android/kwui", kwui_android_template_dir)?;
     tar.finish()?;
+
+    println!("Finished package [{}]", out_filename);
 
     Ok(())
 }

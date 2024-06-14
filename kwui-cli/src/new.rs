@@ -4,22 +4,59 @@ use std::{
     path::Path,
 };
 use std::fs::File;
-use std::io::Cursor;
+use std::io::{Cursor, Write};
 use std::path::PathBuf;
 use clap::builder::OsStr;
 use flate2::read::GzDecoder;
 use itertools::Itertools;
 use tar::Archive;
 use regex::Regex;
+use globmatch;
+use fs_extra;
+use path_absolutize::*;
 
-pub fn new_project(output_dir: &PathBuf, prj_type: &str, crate_name: &str) -> anyhow::Result<()> {
-    println!("CREATE PROJECT IN {}", output_dir.display());
+pub fn kwui_templates_tag() -> String {
+    std::env::var("CARGO_PKG_VERSION").unwrap()
+}
+pub fn kwui_templates_key() -> String {
+    "49125222d214dcdb95a2".into()
+}
+
+pub fn new_project(with_kwui: Option<PathBuf>, output_dir: &PathBuf, prj_type: &str, crate_name: &str) -> anyhow::Result<()> {
+    println!("CREATE PROJECT IN [{}]", output_dir.display());
     std::fs::create_dir_all(output_dir)?;
 
+    apply_template(output_dir, prj_type, crate_name)?;
+
+    if let Some(kwui_dir) = with_kwui {
+        patch_kwui(&kwui_dir, output_dir)?;
+    }
+
+    android_copy_sdk_licenses(output_dir)?;
+    android_copy_cxx_stl_library(output_dir)?;
+
+    println!("CREATE {} PROJECT [{}] DONE", prj_type, crate_name);
+    Ok(())
+}
+
+fn patch_kwui(kwui_dir: &PathBuf, output_dir: &PathBuf) -> anyhow::Result<()> {
+    let kwui_dir = kwui_dir.absolutize().unwrap().display().to_string().replace("\\", "/");
+    println!("PATCHING kwui crate to [{}]", kwui_dir);
+    let mut f = File::options().append(true).open(output_dir.join("Cargo.toml"))?;
+    let content = format!("\n\
+[patch.crates-io]\n\
+kwui = {{ path = \"{kwui_dir}\" }}\n\
+kwui-sys = {{ path = \"{kwui_dir}/kwui-sys\" }}\n\
+kwui-cli = {{ path = \"{kwui_dir}/kwui-cli\" }}\n\
+");
+    f.write_all(&content.into_bytes())?;
+    Ok(())
+}
+
+pub fn apply_template(output_dir: &PathBuf, prj_type: &str, crate_name: &str) -> anyhow::Result<()> {
     let templates_url = kwui_templates_url();
-    println!("USING TEMPLATES URL {}", templates_url);
+    println!("USING TEMPLATES URL [{}]", templates_url);
     let template = download(&templates_url)?;
-    println!("USING TEMPLATES URL {}", template.len());
 
     let mut tar = GzDecoder::new(Cursor::new(template));
     let mut tar = Archive::new(tar);
@@ -58,6 +95,7 @@ fn configure_file(filename: &Path, content: String, crate_name: &str, crate_vers
     let crate_id = String::from("proj.kwui.") + crate_name;
     let crate_version_code = "1000";
 
+    let content = content.replace("@KWUI_TEMPLATES_TAG@", &kwui_templates_tag());
     let content = content.replace("@ANDROID_APPLICATION_NAME@", crate_name);
     let content = content.replace("@ANDROID_APPLICATION_ID@", &crate_id);
     let content = content.replace("@ANDROID_APPLICATION_VERSIONNAME@", crate_version);
@@ -67,8 +105,9 @@ fn configure_file(filename: &Path, content: String, crate_name: &str, crate_vers
     let content = content.replace("@ANDROID_PACKAGE_VERSIONNAME@", crate_version);
     let content = content.replace("@ANDROID_PACKAGE_VERSIONCODE@", crate_version_code);
     let content = content.replace("@ANDROID_ADDITIONAL_PARAMS@", "");
+    let content = content.replace("@ANDROID_ASSETS_DIR@", "../assets");
     let content = content.replace("@JAVA_HOME@", &java_home());
-    let content = content.replace("@CMAKE_ANDROID_SDK@", &android_sdk());
+    let content = content.replace("@CMAKE_ANDROID_SDK@", &android_sdk_home().display().to_string());
 
     let re = Regex::new(r"(@[a-zA-Z_]+@)").unwrap();
     for (_, [placeholder]) in re.captures_iter(&content).map(|c| c.extract()) {
@@ -127,20 +166,66 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
 }
 
 pub fn kwui_templates_url() -> String {
-    const KWUI_TEMPLATES_TAG: &'static str = "0.1.0";
-    const KWUI_TEMPLATES_KEY: &'static str = "80cfc710d93d4b557730";
-
     let url = std::env::var("KWUI_TEMPLATES_URL")
         .unwrap_or("https://github.com/wanghoi/kwui-templates/releases/download/{tag}/kwui-binaries-{key}.tar.gz"
             .into());
-    url.replace("{tag}", KWUI_TEMPLATES_TAG)
-        .replace("{key}", KWUI_TEMPLATES_KEY)
+    url.replace("{tag}", &kwui_templates_tag())
+        .replace("{key}", &kwui_templates_key())
 }
 
 fn java_home() -> String {
     std::env::var("JAVA_HOME").expect("JAVA_HOME environment variable not set")
 }
 
-fn android_sdk() -> String {
-    std::env::var("ANDROID_HOME").expect("ANDROID_HOME environment variable not set")
+fn android_sdk_home() -> PathBuf {
+    std::env::var("ANDROID_HOME").expect("ANDROID_HOME environment variable not set").into()
+}
+
+fn android_copy_sdk_licenses(output_dir: &PathBuf) -> anyhow::Result<()> {
+    let copy_src_dir = android_sdk_home().join("licenses");
+
+    if copy_src_dir.is_dir() {
+        println!("COPY ANDROID LICENSES ");
+        let copy_dest_dir = output_dir.join("android");
+        std::fs::create_dir_all(&copy_dest_dir).expect("create android licenses directory failed");
+        let copy_opts = fs_extra::dir::CopyOptions::new().overwrite(true);
+        fs_extra::copy_items(&[copy_src_dir], copy_dest_dir, &copy_opts)?;
+    } else {
+        println!("cargo::warning=WARN: copy android licenses dir [{}] not found.", copy_src_dir.display());
+    }
+
+    Ok(())
+}
+
+fn android_copy_cxx_stl_library(output_dir: &PathBuf) -> anyhow::Result<()> {
+    println!("COPY ANDROID cxx_shared LIBRARY");
+
+    let src_file = find_library("**/aarch64-linux-android/libc++_shared.so");
+    let copy_dest_dir = output_dir.join("android/app/src/main/jniLibs/arm64-v8a");
+    std::fs::create_dir_all(&copy_dest_dir).expect("create jniLibs directory failed");
+    std::fs::copy(&src_file, &copy_dest_dir.join("libc++_shared.so"))
+        .expect("copy libc++_shared.so failed");
+
+    Ok(())
+}
+
+fn android_ndk_home() -> PathBuf {
+    std::env::var("ANDROID_NDK_HOME")
+        .expect("environment variable \"ANDROID_NDK_HOME\" not set")
+        .into()
+}
+
+fn manifest_dir() -> PathBuf {
+    std::env::var("CARGO_MANIFEST_DIR").unwrap().into()
+}
+
+fn find_library(filepath: &str) -> PathBuf {
+    let b = globmatch::Builder::new(filepath)
+        .build(android_ndk_home())
+        .unwrap();
+    if let Some(Ok(p)) = b.into_iter().next() {
+        return p;
+    } else {
+        panic!("find_library {} failed", filepath)
+    }
 }

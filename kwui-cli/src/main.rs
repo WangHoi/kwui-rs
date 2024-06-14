@@ -1,7 +1,7 @@
 #![allow(unused, dead_code)]
 
 use anyhow;
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use itertools::Itertools;
 use kwui_cli::{self, git_half_hash, PackInput, PackItem};
 use path_clean;
@@ -16,6 +16,12 @@ use walkdir;
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+}
+
+#[derive(ValueEnum, Clone)]
+enum BuildPlatform {
+    Windows,
+    Apk,
 }
 
 #[derive(Subcommand)]
@@ -43,8 +49,20 @@ enum Commands {
         source_dir: PathBuf,
     },
     New {
+        #[arg(long)]
+        with_kwui: Option<PathBuf>,
+        #[arg(long)]
+        root_dir: Option<PathBuf>,
+
         project_name: String,
-    }
+    },
+    Build {
+        #[arg(long, default_value_t = false)]
+        release: bool,
+
+        #[clap(value_enum, default_value_t = BuildPlatform::Windows)]
+        platform: BuildPlatform,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -141,9 +159,18 @@ fn main() -> anyhow::Result<()> {
             let key = key.unwrap_or_else(|| git_half_hash().unwrap_or(String::from("unknown")));
             kwui_cli::template_release::package(&source_dir, &key)?;
         }
-        Commands::New { project_name } => {
-            let output_dir = std::env::current_dir()?.join(&project_name);
-            kwui_cli::new::new_project(&output_dir, "app", &project_name)?;
+        Commands::New { with_kwui, root_dir, project_name } => {
+            let output_dir = root_dir
+                .unwrap_or_else(|| std::env::current_dir().unwrap())
+                .join(&project_name);
+            kwui_cli::new::new_project(with_kwui, &output_dir, "app", &project_name)?;
+        }
+        Commands::Build { release, platform } => {
+            let project_dir = std::env::current_dir()?;
+            match platform {
+                BuildPlatform::Windows => kwui_cli::build::build_windows(&project_dir, release)?,
+                BuildPlatform::Apk => kwui_cli::build::build_apk(&project_dir, release)?,
+            }
         }
     }
     Ok(())

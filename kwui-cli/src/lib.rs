@@ -5,6 +5,8 @@ pub mod packager;
 pub mod binary_release;
 pub mod template_release;
 pub mod new;
+pub mod build;
+pub mod run;
 
 use itertools::Itertools;
 use path_clean;
@@ -169,5 +171,18 @@ pub fn git_half_hash() -> Option<String> {
     } else {
         // need to trim the string to remove newlines at the end.
         Some(String::from_utf8(output.stdout).unwrap().trim().to_string())
+    }
+}
+
+pub fn cargo_package_name(source_dir: &PathBuf) -> anyhow::Result<String> {
+    let manifest = Manifest::from_path(source_dir.join("Cargo.toml"))
+        .map_err(|e| {
+            eprintln!("Load Cargo.toml error: {}", e);
+            e
+        })?;
+    if let Some(pkg) = manifest.package {
+        Ok(pkg.name.clone())
+    } else {
+        anyhow::bail!("Invalid source_dir {}", source_dir.display())
     }
 }
