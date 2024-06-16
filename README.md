@@ -1,15 +1,32 @@
 <div align="center">
-<img src="docs/icon.svg" height="140px" />
+<img src="docs/icon.svg" width="140px" />
 
-# kwui-rs
+# kwui
 
-A small user interface library for daily use.
-Build utility Gui tool with `JSX`、`CSS` and `Rust`,
-at present it is mainly supported Windows, Android and OpenHarmony support is on the way.
+A cross-platform GUI library for Rust focused on simplicity and fast development of small tools.
+Inspired by [sciter](https://sciter.com).
 
 </div>
 
-## Hello world
+## Features
+
+* Builtin JavaScript engine, and CSS parser
+* React Hooks alike functional components API
+* Easy interop between `Rust` and `JavaScript`
+* Cross-platform support (Windows, Android)
+
+## Documentation
+
+- [Programming Guide](https://wanghoi.github.io)
+- [Rust API References](https://docs.rs/kwui)
+
+## FAQ
+
+1. Why another GUI library?
+- Porting server-side Rust code to client-side quickly, to explore and evaluate new technology.
+- Porting tools to mobile platforms quickly.
+
+## Example - Hello world
 
 ```javascript
 import { useState } from "Keact";
@@ -43,36 +60,3 @@ app.showDialog({
 ### Android examples
 ![image](docs/richtext-android.jpg)
 ![image](docs/installer-android.jpg)
-
-## Quick Start
-
-1. Fetch source code
-```bash
-git clone --recurse-submodules https://github.com/wanghoi/kwui-rs.git
-```
-2a. Run Win32 example
-```bash
-# Run the mock installer 
-cargo run -p installer
-```
-2b. Or build Android example apk
-```bash
-# Setup Android development environment, Eg:
-set ANDROID_HOME=D:/Android/Sdk
-set ANDROID_NDK_HOME=D:/Android/Sdk/ndk/27.0.11718014
-set CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=%ANDROID_NDK_HOME%/toolchains/llvm/prebuilt/windows-x86_64/bin/aarch64-linux-android30-clang.cmd
-
-# Build the mock installer 
-cmake --preset android-debug
-cmake --build --preset android-debug --target installer.APK
-```
-
-## Documentation
-- [TODO: API Reference](https://github.com/wanghoi/kwui-rs/wikis)
-
-## FAQ
-
-1. Why another GUI library?
-- Porting server-side Rust code to client-side quickly, to explore and evaluate new technology.
-- Explore end-to-end and server-relay audio and video transport technology.
-- Explore SDWAN technology.

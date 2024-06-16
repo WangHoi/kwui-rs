@@ -199,14 +199,10 @@ fn generate_bindings(
 /// On docs.rs, rustdoc runs inside a container with no networking, so copy a pre-generated
 /// `bindings.rs` file.
 fn fake_bindings() -> Result<(), io::Error> {
-    Ok(())
-    /*
-    println!("COPYING bindings_docs.rs to OUT_DIR/skia/bindings.rs");
+    println!("COPYING bindings_docs.rs to OUT_DIR/bindings.rs");
     let bindings_target = cargo::output_directory()
-        .join(binaries_config::SKIA_OUTPUT_DIR)
         .join("bindings.rs");
-    fs::copy("bindings_docs.rs", bindings_target).map(|_| ())
-    */
+    std::fs::copy("bindings_docs.rs", bindings_target).map(|_| ())
 }
 
 /// Environment variables used by this build script.

@@ -26,6 +26,10 @@ autoexamples = false
 autotests = false
 autobenches = false
 
+[package.metadata.docs.rs]
+# This also sets the default target to `x86_64-pc-windows-msvc`
+targets = ["x86_64-pc-windows-msvc"]
+
 [lib]
 name = "kwui"
 path = "src/lib.rs"
