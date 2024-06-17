@@ -1,6 +1,7 @@
 use kwui_sys::*;
 use std::ffi::CString;
 
+/// The kwui running environment.
 pub struct Application {
     inner: *mut kwui_Application,
 }
@@ -8,6 +9,7 @@ pub struct Application {
 type Closure<'a> = Box<dyn FnOnce() + 'a>;
 
 impl Application {
+    /// Create the kwui Application.
     pub fn new() -> Self {
         let args = std::env::args()
             .into_iter()
@@ -27,9 +29,13 @@ impl Application {
 
         Self { inner }
     }
+    /// Check running in main thread
     pub fn is_main_thread() -> bool {
         unsafe { kwui_Application_isMainThread() }
     }
+    /// Post a task to run in main thread,
+    ///
+    /// NOTE: if already on main thread, run the task immediately.
     pub fn run_in_main_thread<F: FnOnce()>(f: F) {
         let closure: Box<Closure> = Box::new(Box::new(f) as Closure);
 
@@ -37,16 +43,22 @@ impl Application {
             kwui_Application_runInMainThread(Some(invoke_closure), Box::into_raw(closure) as _)
         }
     }
+    /// Set resource directory to local folder
     pub fn set_resource_root_dir(&self, dir: &str) {
         let dir = CString::new(dir).unwrap();
         unsafe { kwui_Application_setResourceRootDir(self.inner, dir.as_ptr()) }
     }
+    /// Load resource from packed data
+    ///
+    /// Users can pack resources with kwui-cli: `kwui pack-archive --help`
     pub fn set_resource_root_data(&self, data: &'static [u8]) {
         unsafe { kwui_Application_setResourceRootData(self.inner, data.as_ptr(), data.len()) }
     }
+    /// Run the main app message loop until the application quits.
     pub fn exec(&self) -> i32 {
         unsafe { kwui_Application_exec(self.inner) }
     }
+    /// Post quit app message
     pub fn quit() {
         unsafe { kwui_Application_quit() }
     }

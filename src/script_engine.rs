@@ -4,7 +4,12 @@ use std::{ffi::CString, io::Read};
 
 use crate::script_value::{FromScriptValue, IntoScriptValue, ScriptValue};
 
+/// The global script engine
+///
+/// For rust and JavaScript interop.
 pub struct ScriptEngine;
+
+/// Handler retrieved from `add_event_handler`, for removing event handler later.
 pub struct ScriptEventHandler {
     event: CString,
     inner: *mut std::os::raw::c_void,
@@ -17,10 +22,16 @@ impl Drop for ScriptEventHandler {
 }
 
 impl ScriptEngine {
+    /// Load and run script file
+    ///
+    /// To load from resource, use ":/" prefix, Example: load_file(":/entry.js")
     pub fn load_file(path: &str) {
         let path = CString::new(path).unwrap();
         unsafe { kwui_ScriptEngine_loadFile(path.as_ptr()) }
     }
+    /// Call JavaScript function
+    ///
+    /// See also: `make_args`, `ScriptValue`
     pub fn call_global_function(name: &str, args: &[ScriptValue]) -> ScriptValue {
         let name = CString::new(name).unwrap();
         let mut args = args
@@ -32,6 +43,7 @@ impl ScriptEngine {
         };
         ScriptValue::from_inner(inner)
     }
+    /// Export Rust function to JavaScript
     pub fn add_global_function<R, Fun, Args>(name: &str, func: Fun)
     where
         Fun: ScriptFunction<R, Args> + 'static,
@@ -48,12 +60,14 @@ impl ScriptEngine {
             );
         }
     }
+    /// Undo export of Rust function
     pub fn remove_global_function(name: &str) {
         let name = CString::new(name).unwrap();
         unsafe {
             kwui_ScriptEngine_removeGlobalFunction(name.as_ptr());
         }
     }
+    /// Add an event listener callback Rust function
     pub fn add_event_listener<R, Fun, Args>(event: &str, func: Fun) -> ScriptEventHandler
     where
         R: IntoScriptValue,
@@ -75,6 +89,7 @@ impl ScriptEngine {
             inner,
         }
     }
+    /// Remove an event listener callback Rust function
     pub fn remove_event_listener(handler: &mut ScriptEventHandler) {
         // eprintln!("remove_event_listener {}", handler.event.to_string_lossy());
         unsafe {
@@ -85,12 +100,14 @@ impl ScriptEngine {
             );
         }
     }
+    /// Trigger an event, both JavaScript and Rust event listeners will be notified.
     pub fn post_event0(event: &str) {
         let c_event = CString::new(event).unwrap();
         unsafe {
             kwui_ScriptEngine_postEvent0(c_event.as_ptr());
         }
     }
+    /// Trigger an event with data, both JavaScript and Rust event listeners will be notified.
     pub fn post_event1(event: &str, data: impl IntoScriptValue) {
         let c_event = CString::new(event).unwrap();
         let data = data.into_script_value();
@@ -104,6 +121,8 @@ impl ScriptEngine {
     }
 }
 
+/// Make script function args, return `[ScriptValue]`
+#[macro_export]
 macro_rules! make_args {
 	() => { { let args : [$crate::value::Value; 0] = []; args } };
 
@@ -121,7 +140,7 @@ macro_rules! make_args {
 
 type Callback<'a> = Box<dyn Fn(&'a [ScriptValue]) -> Result<ScriptValue, ()> + 'a>;
 
-pub trait ScriptFuntionParams: Sized {
+pub(crate) trait ScriptFuntionParams: Sized {
     fn from_params(params: &[ScriptValue]) -> Result<Self, ()>;
 }
 
@@ -165,6 +184,7 @@ impl_script_function_param!(A1, A2, A3, A4, A5, A6);
 impl_script_function_param!(A1, A2, A3, A4, A5, A6, A7);
 impl_script_function_param!(A1, A2, A3, A4, A5, A6, A7, A8);
 
+/// An invokable function with specified signature.
 pub trait ScriptFunction<R, Args> {
     fn invoke(&self, params: &[ScriptValue]) -> Result<ScriptValue, ()>;
 }

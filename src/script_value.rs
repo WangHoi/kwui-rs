@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_int, c_void};
 
+/// Wraps JavaScript value
 pub struct ScriptValue {
     inner: *mut kwui_ScriptValue,
 }
@@ -10,75 +11,93 @@ unsafe impl Send for ScriptValue {}
 unsafe impl Sync for ScriptValue {}
 
 impl ScriptValue {
+    /// Make an explicit JavaScript value from `IntoScriptValue` trait
     pub fn from(v: impl IntoScriptValue) -> Self {
         match v.into_script_value() {
             Ok(v) => v,
             Err(_) => Self::default(),
         }
     }
+    /// Make an explicit JavaScript `null` value
     pub fn new_null() -> Self {
         let inner = unsafe { kwui_ScriptValue_newNull() };
         Self { inner }
     }
+    /// Make an explicit JavaScript `boolean` value
     pub fn new_bool(v: bool) -> Self {
         let inner = unsafe { kwui_ScriptValue_newBool(v) };
         Self { inner }
     }
+    /// Make an explicit JavaScript `integer` value
     pub fn new_int(v: i32) -> Self {
         let inner = unsafe { kwui_ScriptValue_newInt(v) };
         Self { inner }
     }
+    /// Make an explicit JavaScript `float` value
     pub fn new_double(v: f64) -> Self {
         let inner = unsafe { kwui_ScriptValue_newDouble(v) };
         Self { inner }
     }
+    /// Make an explicit JavaScript `string` value
     pub fn new_string(v: &str) -> Self {
         let inner = unsafe { kwui_ScriptValue_newString(v.as_ptr() as _, v.len()) };
         Self { inner }
     }
+    /// Make an explicit JavaScript `array` value
     pub fn new_array() -> Self {
         let inner = unsafe { kwui_ScriptValue_newArray() };
         Self { inner }
     }
+    /// Make an explicit JavaScript `object` value
     pub fn new_object() -> Self {
         let inner = unsafe { kwui_ScriptValue_newObject() };
         Self { inner }
     }
+    /// Retrieve value of sub-element at `idx`.
     pub fn get_value_by_index(&self, idx: usize) -> ScriptValue {
         let inner = unsafe { kwui_ScriptValue_get_by_index(self.inner, idx as _) };
         Self::from_inner(inner)
     }
+    /// Retrieve value of sub-element at `idx`, then convert to `T` type.
     pub fn get_by_index<T: FromScriptValue + Default>(&self, idx: usize) -> T {
         T::from_script_value(&self.get_value_by_index(idx)).unwrap_or(T::default())
     }
+    /// Try to retrieve value of sub-element at `idx`, then convert to `T` type.
     pub fn try_get_by_index<T: FromScriptValue>(&self, idx: usize) -> Result<T, ()> {
         T::from_script_value(&self.get_value_by_index(idx))
     }
+    /// Insert or set value of the sub-element by `idx`.
     pub fn set_value_by_index(&self, idx: usize, v: ScriptValue) {
         unsafe { kwui_ScriptValue_set_by_index(self.inner, idx as _, v.inner) };
     }
+    /// Insert or set value of the sub-element by `idx`.
     pub fn set_by_index(&mut self, idx: usize, v: impl IntoScriptValue) {
         let v = ScriptValue::from(v);
         unsafe { kwui_ScriptValue_set_by_index(self.inner, idx as _, v.inner) };
         std::mem::forget(v);
     }
+    /// Retrieve value of sub-element at `key`.
     pub fn get_value_by_str(&self, key: &str) -> ScriptValue {
         let key = CString::new(key).unwrap_or_default();
         let inner = unsafe { kwui_ScriptValue_get_by_str(self.inner, key.as_ptr()) };
         Self::from_inner(inner)
     }
+    /// Retrieve value of sub-element at `key`, then convert to `T` type.
     pub fn get_by_str<T: FromScriptValue + Default>(&self, key: &str) -> T {
         T::from_script_value(&self.get_value_by_str(key)).unwrap_or_default()
     }
+    /// Try to retrieve value of sub-element at `idx`, then convert to `T` type.
     pub fn try_get_by_str<T: FromScriptValue>(&self, key: &str) -> Result<T, ()> {
         T::from_script_value(&self.get_value_by_str(key))
     }
+    /// Insert or set value of the sub-element by `key`.
     pub fn set_by_str(&mut self, key: &str, v: impl IntoScriptValue) {
         let key = CString::new(key).unwrap_or_default();
         let v = ScriptValue::from(v);
         unsafe { kwui_ScriptValue_set_by_str(self.inner, key.as_ptr(), v.inner) };
         std::mem::forget(v);
     }
+    /// Insert or set value of the sub-element by `key`.
     pub fn set_value_by_str(&mut self, key: &str, v: ScriptValue) {
         let key = CString::new(key).unwrap_or_default();
         unsafe { kwui_ScriptValue_set_by_str(self.inner, key.as_ptr(), v.inner) };
@@ -101,15 +120,19 @@ impl ScriptValue {
     pub fn is_object(&self) -> bool {
         unsafe { kwui_ScriptValue_is_object(self.inner) }
     }
+    /// Value to boolean.
     pub fn to_bool(&self) -> bool {
         unsafe { kwui_ScriptValue_to_bool(self.inner) }
     }
+    /// Value to double.
     pub fn to_double(&self) -> f64 {
         unsafe { kwui_ScriptValue_to_double(self.inner) }
     }
+    /// Value to integer.
     pub fn to_int(&self) -> i32 {
         unsafe { kwui_ScriptValue_to_int(self.inner) }
     }
+    /// Value to string.
     pub fn to_string(&self) -> String {
         let buf = unsafe {
             let mut len = 0;
@@ -118,9 +141,11 @@ impl ScriptValue {
         };
         String::from_utf8_lossy(buf).to_string()
     }
+    /// Length of array or object value.
     pub fn length(&self) -> usize {
         unsafe { kwui_ScriptValue_length(self.inner) }
     }
+    /// Visiting all values of an array.
     pub fn visit_array<F: FnMut(usize, &ScriptValue)>(&self, callback: F) {
         //let callback = Box::into_raw(Box::new(callback)) as *mut c_void;
         unsafe extern "C" fn visit_array_callback<F: FnMut(usize, &ScriptValue)>(
@@ -140,6 +165,7 @@ impl ScriptValue {
             );
         }
     }
+    /// Visiting all values of an object, in arbitrary order.
     pub fn visit_object<F: FnMut(&str, &ScriptValue)>(&self, callback: F) {
         //let callback = Box::into_raw(Box::new(callback)) as *mut c_void;
         unsafe extern "C" fn visit_object_callback<F: FnMut(&str, &ScriptValue)>(
@@ -215,10 +241,12 @@ impl std::fmt::Debug for ScriptValue {
     }
 }
 
+/// Convert `Script` to rust type
 pub trait FromScriptValue: Sized {
     fn from_script_value(value: &ScriptValue) -> Result<Self, ()>;
 }
 
+/// Convert rust type to `ScriptValue`
 pub trait IntoScriptValue {
     fn into_script_value(self) -> Result<ScriptValue, ()>;
 }

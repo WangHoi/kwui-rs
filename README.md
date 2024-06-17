@@ -17,7 +17,7 @@ Inspired by [sciter](https://sciter.com).
 
 ## Documentation
 
-- [Programming Guide](https://wanghoi.github.io)
+- [User Guide](https://wanghoi.github.io/kwui)
 - [Rust API References](https://docs.rs/kwui)
 
 ## FAQ

@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use build_target;
 #[allow(unused_imports)]
 use embed_resource;
@@ -17,6 +18,7 @@ fn main() {
     println!("cargo::metadata=sys_root={}", std::env::var("DEP_KWUI_SYS_ROOT").unwrap());
 }
 
+#[allow(unused)]
 fn pack_examples_resources() {
     let examples_dir = concat!(env!("CARGO_MANIFEST_DIR"), "/examples");
 
@@ -43,6 +45,7 @@ fn pack_examples_resources() {
     }
 }
 
+#[allow(unused)]
 fn copy_kwui_library_android() {
     let target_dir = match std::env::var("CARGO_TARGET_DIR") {
         Ok(dir) => dir,
