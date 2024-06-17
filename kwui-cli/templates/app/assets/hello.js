@@ -4,7 +4,11 @@ function Hello() {
 
 var helloStyle = css`
 p {
-	color: orangered;
+	margin-top: 16px;
+	text-align: center;
+	color: orange;
+	font-weight: bold;
+	font-size: 24px;
 }
 `;
 

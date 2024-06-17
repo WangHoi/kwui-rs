@@ -49,14 +49,15 @@ app.showDialog({
 ## Gallery
 
 ### VoIP Test tool
-![image](docs/VoIPTool.png)
+<img alt="image"  src="docs/VoIPTool.png" width="50%" />
 
 ### Remote Desktop
-![image](docs/KuDesk.jpg)
+<img alt="image" src="docs/KuDesk.jpg" width="50%"/>
 
 ### Installer
-![image](docs/installer.png)
+
+<img alt="image" src="docs/installer.png" width="50%"/>
 
 ### Android examples
-![image](docs/richtext-android.jpg)
-![image](docs/installer-android.jpg)
+<img alt="image" src="docs/richtext-android.jpg" width="33%"/>
+<img alt="image" src="docs/installer-android.jpg" width="33%"/>
