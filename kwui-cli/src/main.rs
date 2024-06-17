@@ -26,40 +26,57 @@ enum BuildPlatform {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Pack resources archive.
     PackArchive {
+        /// Output archive filename.
         output_file: String,
 
+        /// File and directory mapping rules.
         #[arg(name = "SRC_FILE|SRC_DIR|SRC_FILE:DST_FILE|SRC_DIR:DST_DIR")]
         file_dir_mappings: Vec<String>,
     },
+    /// Unpack resources archive.
     UnpackArchive {
+        /// Input archive filename.
         input_file: String,
+        /// Output directory, default to current directory.
         target_dir: Option<String>,
     },
+    /// List resources archive contents.
     ListArchive {
+        /// Input archive filename.
         input_file: String,
     },
+    #[command(hide = true)]
     BinaryRelease {
         source_dir: PathBuf,
     },
+    #[command(hide = true)]
     TemplateRelease {
         #[arg(long)]
         key: Option<String>,
 
         source_dir: PathBuf,
     },
+    /// Create new kwui project from builtin template.
     New {
+        /// Specify local clone of kwui repository.
         #[arg(long)]
         with_kwui: Option<PathBuf>,
+        /// Specify new project's containment directory, default to current directory.
         #[arg(long)]
         root_dir: Option<PathBuf>,
 
+        /// Name of new project.
         project_name: String,
     },
+    /// Build the kwui project in current directory.
     Build {
+        /// Build with release profile, default to debug.
         #[arg(long, default_value_t = false)]
         release: bool,
 
+        /// Target platform.
         #[clap(value_enum, default_value_t = BuildPlatform::Windows)]
         platform: BuildPlatform,
     },
