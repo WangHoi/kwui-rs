@@ -1176,6 +1176,7 @@ dependencies = [
  "build-target",
  "cc",
  "flate2",
+ "globmatch",
  "heck 0.5.0",
  "regex",
  "serde_json",

@@ -7,6 +7,8 @@ use build_support::{
     features, kwui,
 };
 use std::io;
+use std::path::PathBuf;
+use globmatch;
 
 fn main() -> Result<(), io::Error> {
     if env::is_docs_rs_build() {
@@ -141,6 +143,16 @@ fn build_from_source(
     final_configuration
 }
 
+fn find_clang_include_dir(android_ndk_home: &str) -> Option<PathBuf> {
+    let path = globmatch::Builder::new("toolchains/llvm/prebuilt/windows-x86_64/lib/clang/*/include")
+        .build(android_ndk_home).ok()?;
+    if let Some(Ok(p)) = path.into_iter().next() {
+        Some(p)
+    } else {
+        None
+    }
+}
+
 fn generate_bindings(
     // features: &features::Features,
     // definitions: Vec<skia_bindgen::Definition>,
@@ -152,11 +164,15 @@ fn generate_bindings(
     let clang_args: Vec<String> = match target.system.as_str() {
         "android" => {
             let android_ndk_home = std::env::var("ANDROID_NDK_HOME").unwrap();
-            //panic!("{}", format!("-I{}/toolchains/llvm/prebuilt/windows-x86_64/lib/clang/17.0.2/include", android_ndk_home));
+            let clang_include_dir = find_clang_include_dir(&android_ndk_home);
+            let clang_include_dir = clang_include_dir.expect("lib/clang/*/include directory not found")
+                .display()
+                .to_string()
+                .replace('\\', "/");
             vec![
                 "-DKWUI_SHARED_LIBRARY=1".to_string(),
                 format!("--sysroot={}/toolchains/llvm/prebuilt/windows-x86_64/sysroot", android_ndk_home),
-                format!("-I{}/toolchains/llvm/prebuilt/windows-x86_64/lib/clang/18/include", android_ndk_home),
+                format!("-I{}", clang_include_dir),
             ]
         }
         _ => vec!["-DKWUI_STATIC_LIBRARY=1".to_string()],
