@@ -28,5 +28,5 @@ windows_dpi = "0.3.0"
 [build-dependencies]
 build-target = "0.4.0"
 embed-resource = "2.4.1"
-kwui-cli = { workspace = true }
+kwui-cli = { path = "../../kwui-cli" }
 walkdir = "2.5.0"

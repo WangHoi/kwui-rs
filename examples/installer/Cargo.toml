@@ -18,9 +18,8 @@ anyhow = "1.0.80"
 tokio = { version = "1.36.0", features = ["full"] }
 kwui = { path = "../../" }
 
-[target.'cfg(target_os = "android")'.dependencies]
-reqwest = { version = "0.11.24", default-features = false }
+[build-dependencies]
+kwui-cli = { path = "../../kwui-cli" }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
-reqwest = { version = "0.11.24" }
 windows_dpi = "0.3.0"
