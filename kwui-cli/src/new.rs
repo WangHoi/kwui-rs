@@ -11,19 +11,6 @@ use globmatch;
 use fs_extra;
 use path_absolutize::*;
 
-pub fn kwui_templates_tag() -> String {
-    package_version()
-}
-
-pub fn kwui_templates_key() -> String {
-    if let Ok(hash) = crate_repository_hash() {
-        trim_hash(&hash)
-    } else {
-        println!("warning: templates key not found.");
-        String::new()
-    }
-}
-
 pub fn new_project(with_kwui: Option<PathBuf>, output_dir: &PathBuf, prj_type: &str, crate_name: &str) -> anyhow::Result<()> {
     println!("CREATE PROJECT IN [{}]", output_dir.display());
     std::fs::create_dir_all(output_dir)?;
@@ -97,7 +84,7 @@ fn configure_file(filename: &Path, content: String, crate_name: &str, crate_vers
     let crate_id = String::from("proj.kwui.") + crate_name;
     let crate_version_code = "1000";
 
-    let content = content.replace("@KWUI_TEMPLATES_TAG@", &kwui_templates_tag());
+    let content = content.replace("@KWUI_TEMPLATES_TAG@", env!("TAG"));
     let content = content.replace("@ANDROID_APPLICATION_NAME@", crate_name);
     let content = content.replace("@ANDROID_APPLICATION_ID@", &crate_id);
     let content = content.replace("@ANDROID_APPLICATION_VERSIONNAME@", crate_version);
@@ -171,8 +158,8 @@ pub fn kwui_templates_url() -> String {
     let url = std::env::var("KWUI_TEMPLATES_URL")
         .unwrap_or("https://github.com/wanghoi/kwui-binaries/releases/download/{tag}/kwui-templates-{key}.tar.gz"
             .into());
-    url.replace("{tag}", &kwui_templates_tag())
-        .replace("{key}", &kwui_templates_key())
+    url.replace("{tag}", env!("TAG"))
+        .replace("{key}", env!("KEY"))
 }
 
 fn java_home() -> String {
@@ -230,29 +217,4 @@ fn find_library(filepath: &str) -> PathBuf {
     } else {
         panic!("find_library {} failed", filepath)
     }
-}
-
-fn package_version() -> String {
-    env::var("CARGO_PKG_VERSION").unwrap().as_str().into()
-}
-
-fn is_crate() -> bool {
-    crate_repository_hash().is_ok()
-}
-
-// If we are building from within a crate, return the full commit hash
-// of the repository the crate was packaged from.
-fn crate_repository_hash() -> io::Result<String> {
-    let vcs_info = fs::read_to_string(".cargo_vcs_info.json")?;
-    let value: serde_json::Value = serde_json::from_str(&vcs_info)?;
-    let git = value.get("git").expect("failed to get 'git' property");
-    let sha1 = git.get("sha1").expect("failed to get 'sha1' property");
-    Ok(sha1.as_str().unwrap().into())
-}
-
-const HALF_HASH_LENGTH: usize = 20;
-
-fn trim_hash(hash: &str) -> String
-{
-    hash[..HALF_HASH_LENGTH].into()
 }
