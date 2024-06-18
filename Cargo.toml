@@ -2,12 +2,9 @@
 members = ["examples/installer", "examples/rss_reader", "kwui-sys", "kwui-cli"]
 
 [workspace.package]
-version = "0.2.1-beta.1"
+version = "0.2.1-beta.2"
 license = "LGPL-3.0-or-later"
 edition = "2021"
-
-[workspace.dependencies]
-kwui-cli = { version = "0.2.0-beta.3", path = "kwui-cli" }
 
 [package]
 name = "kwui"
@@ -36,12 +33,12 @@ path = "src/lib.rs"
 
 [dependencies]
 log = "0.4.20"
-kwui-sys = { version = "0.2.1-beta.1", path = "kwui-sys" }
+kwui-sys = { version = "0.2.1-beta.2", path = "kwui-sys" }
 
 [build-dependencies]
 build-target = "0.4.0"
 embed-resource = "2.4.1"
-kwui-cli = { version = "0.2.1-beta.1", path = "kwui-cli" }
+kwui-cli = { version = "0.2.1-beta.2", path = "kwui-cli" }
 walkdir = "2.5.0"
 
 [patch.crates-io]
