@@ -50,10 +50,7 @@ fn prepare_staging_dir(target: &str) -> anyhow::Result<PathBuf> {
 }
 
 fn temp_dir() -> PathBuf {
-    match std::env::var("KWUI_BINARIES_URL") {
-        Ok(url) if url.starts_with("file://") => PathBuf::from(&url[7..]),
-        _ => std::env::temp_dir(),
-    }
+    PathBuf::from(KWUI_BINARIES)
 }
 
 const KWUI_BINARIES: &'static str = "kwui-binaries";

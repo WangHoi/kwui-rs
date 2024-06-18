@@ -173,7 +173,7 @@ fn main() -> anyhow::Result<()> {
             kwui_cli::binary_release::build_and_package(&source_dir)?;
         }
         Commands::TemplateRelease { source_dir, key } => {
-            let key = key.unwrap_or_else(|| git_half_hash().unwrap_or(String::from("unknown")));
+            let key = key.unwrap_or_else(|| git_half_hash(&source_dir).unwrap_or(String::from("unknown")));
             kwui_cli::template_release::package(&source_dir, &key)?;
         }
         Commands::New { with_kwui, root_dir, project_name } => {

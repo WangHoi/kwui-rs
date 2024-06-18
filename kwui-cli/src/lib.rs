@@ -162,9 +162,9 @@ pub fn check_source_dir(source_dir: &PathBuf) -> anyhow::Result<()> {
     anyhow::bail!("Invalid source_dir {}", source_dir.display())
 }
 
-pub fn git_half_hash() -> Option<String> {
+pub fn git_half_hash(source_dir: &PathBuf) -> Option<String> {
     let mut cmd = Command::new("git");
-    cmd.arg("rev-parse").arg("--short=20");
+    cmd.current_dir(source_dir).arg("rev-parse").arg("--short=20");
     let output = cmd.arg("HEAD").stderr(Stdio::inherit()).output().ok()?;
     if output.status.code() != Some(0) {
         None

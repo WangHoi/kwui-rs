@@ -1,8 +1,4 @@
-use std::{
-    fs,
-    io::{self, Error, ErrorKind, Read},
-    path::Path,
-};
+use std::{env, fs, io::{self, Error, ErrorKind, Read}, path::Path};
 use std::fs::File;
 use std::io::{Cursor, Write};
 use std::path::PathBuf;
@@ -15,17 +11,13 @@ use globmatch;
 use fs_extra;
 use path_absolutize::*;
 
-#[path = "../../kwui-sys/build_support/cargo.rs"]
-mod cargo;
-#[path = "../../kwui-sys/build_support/binary_cache/git.rs"]
-mod git;
-
 pub fn kwui_templates_tag() -> String {
-    cargo::package_version()
+    package_version()
 }
+
 pub fn kwui_templates_key() -> String {
-    if let Ok(hash) = cargo::crate_repository_hash() {
-        git::trim_hash(&hash)
+    if let Ok(hash) = crate_repository_hash() {
+        trim_hash(&hash)
     } else {
         println!("warning: templates key not found.");
         String::new()
@@ -177,7 +169,7 @@ pub fn download(url: impl AsRef<str>) -> io::Result<Vec<u8>> {
 
 pub fn kwui_templates_url() -> String {
     let url = std::env::var("KWUI_TEMPLATES_URL")
-        .unwrap_or("https://github.com/wanghoi/kwui-templates/releases/download/{tag}/kwui-binaries-{key}.tar.gz"
+        .unwrap_or("https://github.com/wanghoi/kwui-binaries/releases/download/{tag}/kwui-templates-{key}.tar.gz"
             .into());
     url.replace("{tag}", &kwui_templates_tag())
         .replace("{key}", &kwui_templates_key())
@@ -238,4 +230,29 @@ fn find_library(filepath: &str) -> PathBuf {
     } else {
         panic!("find_library {} failed", filepath)
     }
+}
+
+fn package_version() -> String {
+    env::var("CARGO_PKG_VERSION").unwrap().as_str().into()
+}
+
+fn is_crate() -> bool {
+    crate_repository_hash().is_ok()
+}
+
+// If we are building from within a crate, return the full commit hash
+// of the repository the crate was packaged from.
+fn crate_repository_hash() -> io::Result<String> {
+    let vcs_info = fs::read_to_string(".cargo_vcs_info.json")?;
+    let value: serde_json::Value = serde_json::from_str(&vcs_info)?;
+    let git = value.get("git").expect("failed to get 'git' property");
+    let sha1 = git.get("sha1").expect("failed to get 'sha1' property");
+    Ok(sha1.as_str().unwrap().into())
+}
+
+const HALF_HASH_LENGTH: usize = 20;
+
+fn trim_hash(hash: &str) -> String
+{
+    hash[..HALF_HASH_LENGTH].into()
 }
