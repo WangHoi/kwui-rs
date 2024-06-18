@@ -6,6 +6,7 @@ use flate2::write::GzEncoder;
 use tar::Builder;
 use std::io::{BufRead, BufReader};
 use cargo_toml::Manifest;
+use path_absolutize::*;
 use crate::check_source_dir;
 
 const TARGETS: &[&'static str] = &[
@@ -44,13 +45,9 @@ fn build_and_package_target(source_dir: &PathBuf, target: &str) -> anyhow::Resul
 }
 
 fn prepare_staging_dir(target: &str) -> anyhow::Result<PathBuf> {
-    let staging_dir = temp_dir().join(target);
+    let staging_dir = PathBuf::from("build").join(target);
     std::fs::create_dir_all(&staging_dir)?;
-    Ok(staging_dir)
-}
-
-fn temp_dir() -> PathBuf {
-    PathBuf::from(KWUI_BINARIES)
+    Ok(staging_dir.absolutize().unwrap().into())
 }
 
 const KWUI_BINARIES: &'static str = "kwui-binaries";
