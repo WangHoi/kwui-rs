@@ -50,7 +50,9 @@ fn prepare_staging_dir(target: &str) -> anyhow::Result<PathBuf> {
 }
 
 fn temp_dir() -> PathBuf {
-    PathBuf::from(KWUI_BINARIES)
+    let path = PathBuf::from(KWUI_BINARIES);
+    let _ = std::fs::create_dir_all(&path);
+    path
 }
 
 const KWUI_BINARIES: &'static str = "kwui-binaries";
