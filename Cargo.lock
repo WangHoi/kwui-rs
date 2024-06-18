@@ -1160,6 +1160,7 @@ dependencies = [
  "path-absolutize",
  "path-clean",
  "regex",
+ "serde_json",
  "sha1",
  "size",
  "tar",

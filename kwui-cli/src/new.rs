@@ -15,11 +15,21 @@ use globmatch;
 use fs_extra;
 use path_absolutize::*;
 
+#[path = "../../kwui-sys/build_support/cargo.rs"]
+mod cargo;
+#[path = "../../kwui-sys/build_support/binary_cache/git.rs"]
+mod git;
+
 pub fn kwui_templates_tag() -> String {
-    std::env::var("CARGO_PKG_VERSION").unwrap()
+    cargo::package_version()
 }
 pub fn kwui_templates_key() -> String {
-    "49125222d214dcdb95a2".into()
+    if let Ok(hash) = cargo::crate_repository_hash() {
+        git::trim_hash(&hash)
+    } else {
+        println!("warning: templates key not found.");
+        String::new()
+    }
 }
 
 pub fn new_project(with_kwui: Option<PathBuf>, output_dir: &PathBuf, prj_type: &str, crate_name: &str) -> anyhow::Result<()> {
