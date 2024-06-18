@@ -65,9 +65,9 @@ pub fn build_apk(project_dir: &PathBuf, release: bool) ->anyhow::Result<()> {
 
     let apk_output_dir = project_dir.join("android/app/build/outputs/apk").join(profile);
     let apk_output_name = if release {
-        "app-release.apk"
+        "app-release-unsigned.apk"
     } else {
-        "app.apk"
+        "app-debug.apk"
     };
     println!("BUILT apk [{}]", apk_output_dir.join(apk_output_name).display());
 

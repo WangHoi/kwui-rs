@@ -2,7 +2,7 @@
 members = ["examples/installer", "examples/rss_reader", "kwui-sys", "kwui-cli"]
 
 [workspace.package]
-version = "0.2.1-beta.4"
+version = "0.2.1"
 license = "LGPL-3.0-or-later"
 edition = "2021"
 
