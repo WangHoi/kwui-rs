@@ -13,6 +13,7 @@ use globmatch;
 fn main() -> Result<(), io::Error> {
     if env::is_docs_rs_build() {
         println!("DETECTED DOCS_RS BUILD");
+        println!("cargo:root={}", std::env::var("OUT_DIR").unwrap());
         return fake_bindings();
     }
 

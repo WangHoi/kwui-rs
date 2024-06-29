@@ -7,9 +7,14 @@ use size::Size;
 use std::{
     fs::File,
     io::{BufRead, BufReader, Read, Seek, SeekFrom, Write},
-    os::windows::fs::MetadataExt,
     path::PathBuf,
 };
+
+#[cfg(windows)]
+use std::os::windows::fs::MetadataExt;
+
+#[cfg(unix)]
+use std::os::unix::fs::MetadataExt;
 
 const SOLID_CHUNK_SIZE: usize = 256 << 20;
 
@@ -404,7 +409,12 @@ fn find_item(items: &[Item], length: usize, digest: &[u8; 20]) -> Option<usize> 
 
 fn scan_file(fpath: &str) -> anyhow::Result<(u64, [u8; 20])> {
     let f = File::open(fpath)?;
+
+    #[cfg(windows)]
     let file_len = f.metadata()?.file_size();
+    #[cfg(unix)]
+    let file_len = f.metadata()?.size();
+
     let mut reader = BufReader::new(f);
     let mut hasher = Sha1::new();
     loop {
