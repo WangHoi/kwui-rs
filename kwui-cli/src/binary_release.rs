@@ -45,7 +45,7 @@ fn build_and_package_target(source_dir: &PathBuf, target: &str, static_crt: bool
             cmd.env("RUSTFLAGS", "-Ctarget-feature=+crt-static");
         };
         cmd
-            .args(["/c", "cargo", "build", "--target", target, "-p", "kwui-sys"])
+            .args(["/c", "cargo", "build", "--release", "--target", target, "-p", "kwui-sys", "-vv"])
             .status()?
     };
     if !status.success() {
