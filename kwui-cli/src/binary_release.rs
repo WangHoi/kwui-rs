@@ -16,24 +16,39 @@ const TARGETS: &[&'static str] = &[
 
 pub fn build_and_package(source_dir: &PathBuf) -> anyhow::Result<()> {
     for tgt in TARGETS.iter() {
-        build_and_package_target(source_dir, *tgt)?;
+        build_and_package_target(source_dir, *tgt, false)?;
+        if tgt.ends_with("-msvc") {
+            build_and_package_target(source_dir, *tgt, true)?;
+        }
     }
     Ok(())
 }
 
-fn build_and_package_target(source_dir: &PathBuf, target: &str) -> anyhow::Result<()> {
+fn build_and_package_target(source_dir: &PathBuf, target: &str, static_crt: bool) -> anyhow::Result<()> {
     println!("Checking source_dir [{}] ...", source_dir.display());
     check_source_dir(source_dir)?;
 
     let staging_dir = prepare_staging_dir(target)?;
     println!("Staging dir: {}", staging_dir.display());
 
-    println!("Building on source_dir [{}], for target '{}' ...", source_dir.display(), target);
-    let status = std::process::Command::new("cmd")
-        .current_dir(source_dir)
-        .env("BUILD_ARTIFACTSTAGINGDIRECTORY", &staging_dir)
-        .args(["/c", "cargo", "build", "--target", target, "-p", "kwui-sys"])
-        .status()?;
+    println!("Building on source_dir [{}], for target '{}{}' ...", source_dir.display(), target,
+             if static_crt {
+                 ", with static CRT"
+             } else {
+                 ""
+             });
+    let status = {
+        let mut cmd =
+            std::process::Command::new("cmd")
+                .current_dir(source_dir)
+                .env("BUILD_ARTIFACTSTAGINGDIRECTORY", &staging_dir);
+        if static_crt {
+            cmd.env("CARGO_CFG_TARGET_FEATURE", "crt-static");
+        }
+        cmd
+            .args(["/c", "cargo", "build", "--target", target, "-p", "kwui-sys"])
+            .status()?
+    };
     if !status.success() {
         anyhow::bail!("BUILD TARGET {} failed: {}", target, status);
     }
