@@ -83,11 +83,17 @@ impl Target {
     pub fn library_to_filenames(&self, name: impl AsRef<str>) -> Vec<PathBuf> {
         let name = name.as_ref();
         if self.is_windows() {
-            vec![
-                format!("lib/{name}.lib").into(),
-                format!("lib/{name}.dll").into(),
-                format!("lib/{name}.pdb").into(),
-            ]
+            if target_crt_static() {
+                vec![
+                    format!("lib/{name}.lib").into(),
+                ]
+            } else {
+                vec![
+                    format!("lib/{name}.lib").into(),
+                    format!("lib/{name}.dll").into(),
+                    format!("lib/{name}.pdb").into(),
+                ]
+            }
         } else {
             vec![
                 format!("lib/lib{name}.so").into()

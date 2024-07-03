@@ -81,6 +81,7 @@ impl BuildConfiguration {
 }
 
 /// This is the final, low level build configuration.
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct FinalBuildConfiguration {
     /// The kwui source directory.

@@ -23,6 +23,7 @@ pub fn gn_args(config: &BuildConfiguration, mut builder: CMakeArgsBuilder) -> Ve
     builder.into_gn_args()
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct BindgenAndCCArgs {
     pub args: Vec<String>,

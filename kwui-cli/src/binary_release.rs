@@ -28,23 +28,22 @@ fn build_and_package_target(source_dir: &PathBuf, target: &str, static_crt: bool
     println!("Checking source_dir [{}] ...", source_dir.display());
     check_source_dir(source_dir)?;
 
-    let staging_dir = prepare_staging_dir(target)?;
+    let staging_dir = prepare_staging_dir(target, static_crt)?;
     println!("Staging dir: {}", staging_dir.display());
 
-    println!("Building on source_dir [{}], for target '{}{}' ...", source_dir.display(), target,
+    println!("Building on source_dir [{}], for target '{}'{}' ...", source_dir.display(), target,
              if static_crt {
                  ", with static CRT"
              } else {
                  ""
              });
     let status = {
-        let mut cmd =
-            std::process::Command::new("cmd")
-                .current_dir(source_dir)
-                .env("BUILD_ARTIFACTSTAGINGDIRECTORY", &staging_dir);
+        let mut cmd = std::process::Command::new("cmd");
+        cmd.current_dir(source_dir)
+           .env("BUILD_ARTIFACTSTAGINGDIRECTORY", &staging_dir);
         if static_crt {
-            cmd.env("CARGO_CFG_TARGET_FEATURE", "crt-static");
-        }
+            cmd.env("RUSTFLAGS", "-Ctarget-feature=+crt-static");
+        };
         cmd
             .args(["/c", "cargo", "build", "--target", target, "-p", "kwui-sys"])
             .status()?
@@ -59,8 +58,12 @@ fn build_and_package_target(source_dir: &PathBuf, target: &str, static_crt: bool
     Ok(())
 }
 
-fn prepare_staging_dir(target: &str) -> anyhow::Result<PathBuf> {
-    let staging_dir = PathBuf::from("build").join(target);
+fn prepare_staging_dir(target: &str, static_crt: bool) -> anyhow::Result<PathBuf> {
+    let staging_dir = if static_crt {
+        PathBuf::from("build").join(format!("{}-static", target))
+    } else {
+        PathBuf::from("build").join(target)
+    };
     std::fs::create_dir_all(&staging_dir)?;
     Ok(staging_dir.absolutize().unwrap().into())
 }
