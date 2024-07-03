@@ -2,7 +2,7 @@ use std::{env, fs, io::{self, Error, ErrorKind, Read}, path::Path};
 use std::fs::File;
 use std::io::{Cursor, Write};
 use std::path::PathBuf;
-use clap::builder::OsStr;
+use clap::builder::{OsStr, Str};
 use flate2::read::GzDecoder;
 use itertools::Itertools;
 use tar::Archive;
@@ -11,41 +11,41 @@ use globmatch;
 use fs_extra;
 use path_absolutize::*;
 
-pub fn new_project(with_kwui: Option<PathBuf>, output_dir: &PathBuf, prj_type: &str, crate_name: &str) -> anyhow::Result<()> {
+pub fn new_project(with_kwui: Option<PathBuf>, static_crt: bool, output_dir: &PathBuf, prj_type: &str, crate_name: &str) -> anyhow::Result<()> {
     println!("CREATE PROJECT IN [{}]", output_dir.display());
     std::fs::create_dir_all(output_dir)?;
 
-    apply_template(output_dir, prj_type, crate_name)?;
-
-    if let Some(kwui_dir) = with_kwui {
-        patch_kwui(&kwui_dir, output_dir)?;
+    let mut enable_android = true;
+    if let Err(_) = android_sdk_home() {
+        println!("WARNING: $ANDROID_HOME NOT SET, ANDROID SUPPORT DISABLED!");
+        enable_android = false;
+    }
+    if let Err(_) = android_ndk_home() {
+        println!("WARNING: $ANDROID_NDK_HOME NOT SET, ANDROID SUPPORT DISABLED!");
+        enable_android = false;
+    }
+    if let Err(_) = java_home() {
+        println!("WARNING: $JAVA_HOME NOT SET, ANDROID SUPPORT DISABLED!");
+        enable_android = false;
     }
 
-    android_copy_sdk_licenses(output_dir)?;
-    android_copy_cxx_stl_library(output_dir)?;
+    apply_template(output_dir, prj_type, crate_name, with_kwui, enable_android)?;
+
+    if enable_android {
+        android_copy_sdk_licenses(output_dir)?;
+        android_copy_cxx_stl_library(output_dir)?;
+    }
 
     println!("CREATE {} PROJECT [{}] DONE", prj_type, crate_name);
     Ok(())
 }
 
-fn patch_kwui(kwui_dir: &PathBuf, output_dir: &PathBuf) -> anyhow::Result<()> {
-    let kwui_dir = kwui_dir.absolutize().unwrap().display().to_string().replace("\\", "/");
-    println!("PATCHING kwui crate to [{}]", kwui_dir);
-    let mut f = File::options().append(true).open(output_dir.join("Cargo.toml"))?;
-    let content = format!("\n\
-[patch.crates-io]\n\
-kwui = {{ path = \"{kwui_dir}\" }}\n\
-kwui-sys = {{ path = \"{kwui_dir}/kwui-sys\" }}\n\
-kwui-cli = {{ path = \"{kwui_dir}/kwui-cli\" }}\n\
-");
-    f.write_all(&content.into_bytes())?;
-    Ok(())
-}
-
-pub fn apply_template(output_dir: &PathBuf, prj_type: &str, crate_name: &str) -> anyhow::Result<()> {
+pub fn apply_template(output_dir: &PathBuf, prj_type: &str, crate_name: &str, with_kwui: Option<PathBuf>, enable_android: bool) -> anyhow::Result<()> {
     let templates_url = kwui_templates_url();
     println!("USING TEMPLATES URL [{}]", templates_url);
     let template = download(&templates_url)?;
+
+    let (kwui_rs, kwui_sys, kwui_cli) = kwui_dirs(env!("TAG"), with_kwui);
 
     let mut tar = GzDecoder::new(Cursor::new(template));
     let mut tar = Archive::new(tar);
@@ -64,7 +64,8 @@ pub fn apply_template(output_dir: &PathBuf, prj_type: &str, crate_name: &str) ->
                 let mut content = String::new();
                 entry.read_to_string(&mut content)?;
 
-                let content = configure_file(&src_path, content, crate_name, "0.1.0");
+                let content = configure_file(&src_path, content, crate_name, "0.1.0",
+                                             &kwui_rs, &kwui_sys, &kwui_cli, enable_android);
 
                 // strip ".in" postfix
                 let mut dst_path = output_dir.join(src_path);
@@ -80,23 +81,48 @@ pub fn apply_template(output_dir: &PathBuf, prj_type: &str, crate_name: &str) ->
     Ok(())
 }
 
-fn configure_file(filename: &Path, content: String, crate_name: &str, crate_version: &str) -> String {
+// returns (kwui_rs_dir, kwui_sys_dir, kwui_cli_dir)
+fn kwui_dirs(tag: &str, with_kwui: Option<PathBuf>) -> (String, String, String) {
+    if let Some(Ok(kwui_dir)) = with_kwui.map(|p| p.absolutize().map(|e| e.to_path_buf())) {
+        let kwui_dir = kwui_dir.display().to_string().replace('\\', "/");
+        let kwui_rs = format!("{{ version = \"{}\", path = \"{}\" }}",
+                              tag, &kwui_dir);
+        let kwui_sys = format!("{{ version = \"{}\", path = \"{}/kwui-sys\" }}",
+                               tag, &kwui_dir);
+        let kwui_cli = format!("{{ version = \"{}\", path = \"{}/kwui-cli\" }}",
+                               tag, &kwui_dir);
+        (kwui_rs, kwui_sys, kwui_cli)
+    } else {
+        let version = format!("\"{}\"", tag);
+        (version.clone(), version.clone(), version)
+    }
+}
+
+fn configure_file(filename: &Path, content: String, crate_name: &str, crate_version: &str,
+                  kwui_rs: &str, kwui_sys: &str, kwui_cli: &str, enable_android: bool) -> String {
     let crate_id = String::from("proj.kwui.") + crate_name;
     let crate_version_code = "1000";
 
-    let content = content.replace("@KWUI_TEMPLATES_TAG@", env!("TAG"));
-    let content = content.replace("@ANDROID_APPLICATION_NAME@", crate_name);
-    let content = content.replace("@ANDROID_APPLICATION_ID@", &crate_id);
-    let content = content.replace("@ANDROID_APPLICATION_VERSIONNAME@", crate_version);
-    let content = content.replace("@ANDROID_APPLICATION_VERSIONCODE@", crate_version_code);
-    let content = content.replace("@ANDROID_PACKAGE_NAME@", crate_name);
-    let content = content.replace("@ANDROID_PACKAGE_ID@", &crate_id);
-    let content = content.replace("@ANDROID_PACKAGE_VERSIONNAME@", crate_version);
-    let content = content.replace("@ANDROID_PACKAGE_VERSIONCODE@", crate_version_code);
-    let content = content.replace("@ANDROID_ADDITIONAL_PARAMS@", "");
-    let content = content.replace("@ANDROID_ASSETS_DIR@", "../assets");
-    let content = content.replace("@JAVA_HOME@", &java_home());
-    let content = content.replace("@CMAKE_ANDROID_SDK@", &android_sdk_home().display().to_string());
+    let content = content.replace("@KWUI_RS_DEP@", kwui_rs);
+    let content = content.replace("@KWUI_SYS_DEP@", kwui_sys);
+    let content = content.replace("@KWUI_CLI_DEP@", kwui_cli);
+    let content = if enable_android {
+        let content = content.replace("@ANDROID_APPLICATION_NAME@", crate_name);
+        let content = content.replace("@ANDROID_APPLICATION_ID@", &crate_id);
+        let content = content.replace("@ANDROID_APPLICATION_VERSIONNAME@", crate_version);
+        let content = content.replace("@ANDROID_APPLICATION_VERSIONCODE@", crate_version_code);
+        let content = content.replace("@ANDROID_PACKAGE_NAME@", crate_name);
+        let content = content.replace("@ANDROID_PACKAGE_ID@", &crate_id);
+        let content = content.replace("@ANDROID_PACKAGE_VERSIONNAME@", crate_version);
+        let content = content.replace("@ANDROID_PACKAGE_VERSIONCODE@", crate_version_code);
+        let content = content.replace("@ANDROID_ADDITIONAL_PARAMS@", "");
+        let content = content.replace("@ANDROID_ASSETS_DIR@", "../assets");
+        let content = content.replace("@JAVA_HOME@", &java_home().unwrap());
+        let content = content.replace("@CMAKE_ANDROID_SDK@", &android_sdk_home().unwrap_or_default().display().to_string());
+        content
+    } else {
+        content
+    };
 
     let re = Regex::new(r"(@[a-zA-Z_]+@)").unwrap();
     for (_, [placeholder]) in re.captures_iter(&content).map(|c| c.extract()) {
@@ -162,16 +188,18 @@ pub fn kwui_templates_url() -> String {
         .replace("{key}", env!("KEY"))
 }
 
-fn java_home() -> String {
-    std::env::var("JAVA_HOME").expect("JAVA_HOME environment variable not set")
+fn java_home() -> anyhow::Result<String> {
+    let s = std::env::var("JAVA_HOME")?;
+    Ok(s)
 }
 
-fn android_sdk_home() -> PathBuf {
-    std::env::var("ANDROID_HOME").expect("ANDROID_HOME environment variable not set").into()
+fn android_sdk_home() -> anyhow::Result<PathBuf> {
+    let s = std::env::var("ANDROID_HOME")?;
+    Ok(PathBuf::from(s))
 }
 
 fn android_copy_sdk_licenses(output_dir: &PathBuf) -> anyhow::Result<()> {
-    let copy_src_dir = android_sdk_home().join("licenses");
+    let copy_src_dir = android_sdk_home()?.join("licenses");
 
     if copy_src_dir.is_dir() {
         println!("COPY ANDROID LICENSES ");
@@ -189,32 +217,34 @@ fn android_copy_sdk_licenses(output_dir: &PathBuf) -> anyhow::Result<()> {
 fn android_copy_cxx_stl_library(output_dir: &PathBuf) -> anyhow::Result<()> {
     println!("COPY ANDROID cxx_shared LIBRARY");
 
-    let src_file = find_library("**/aarch64-linux-android/libc++_shared.so");
+    let src_file = find_library("**/aarch64-linux-android/libc++_shared.so")?;
     let copy_dest_dir = output_dir.join("android/app/src/main/jniLibs/arm64-v8a");
     std::fs::create_dir_all(&copy_dest_dir).expect("create jniLibs directory failed");
     std::fs::copy(&src_file, &copy_dest_dir.join("libc++_shared.so"))
-        .expect("copy libc++_shared.so failed");
+        .map_err(|e| {
+            eprintln!("copy libc++_shared.so failed");
+            e
+        })?;
 
     Ok(())
 }
 
-fn android_ndk_home() -> PathBuf {
-    std::env::var("ANDROID_NDK_HOME")
-        .expect("environment variable \"ANDROID_NDK_HOME\" not set")
-        .into()
+fn android_ndk_home() -> anyhow::Result<PathBuf> {
+    let s = std::env::var("ANDROID_NDK_HOME")?;
+    Ok(PathBuf::from(s))
 }
 
 fn manifest_dir() -> PathBuf {
     std::env::var("CARGO_MANIFEST_DIR").unwrap().into()
 }
 
-fn find_library(filepath: &str) -> PathBuf {
+fn find_library(filepath: &str) -> anyhow::Result<PathBuf> {
     let b = globmatch::Builder::new(filepath)
-        .build(android_ndk_home())
+        .build(android_ndk_home()?)
         .unwrap();
     if let Some(Ok(p)) = b.into_iter().next() {
-        return p;
+        Ok(p)
     } else {
-        panic!("find_library {} failed", filepath)
+        anyhow::bail!("find_library {} failed", filepath)
     }
 }

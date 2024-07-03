@@ -12,6 +12,7 @@ use std::{
 /// The libraries to link with.
 pub mod lib {
     pub const KWUI: &str = "kwui";
+    pub const KWUI_STATIC: &str = "kwui_static";
     // pub const SKIA_BINDINGS: &str = "skia-bindings";
     // pub const SK_SHAPER: &str = "skshaper";
     // pub const SK_PARAGRAPH: &str = "skparagraph";
@@ -84,7 +85,11 @@ impl BinariesConfiguration {
             .unwrap()
             .into();
 
-        ninja_built_libraries.push(lib::KWUI.into());
+        if target.is_windows() && cargo::target_crt_static() {
+            ninja_built_libraries.push(lib::KWUI_STATIC.into());
+        } else {
+            ninja_built_libraries.push(lib::KWUI.into());
+        }
         // binding_libraries.push(lib::SKIA_BINDINGS.into());
 
         BinariesConfiguration {
@@ -120,9 +125,13 @@ impl BinariesConfiguration {
         // On Linux, the order is significant, first the static libraries we built, and then
         // the system libraries.
 
-        let _target = cargo::target();
+        let target = cargo::target();
 
-        cargo::add_link_libs(self.built_libraries(true));
+        if target.is_windows() && cargo::target_crt_static() {
+            cargo::add_static_link_libs(&target, self.built_libraries(true));
+        } else {
+            cargo::add_link_libs(self.built_libraries(true));
+        }
         cargo::add_link_libs(&self.link_libraries);
     }
 

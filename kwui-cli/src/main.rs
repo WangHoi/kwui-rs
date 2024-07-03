@@ -63,6 +63,11 @@ enum Commands {
         /// Specify local clone of kwui repository.
         #[arg(long)]
         with_kwui: Option<PathBuf>,
+
+        /// Specify statically linking to CRT on MSVC
+        #[arg(long, default_value_t = false)]
+        static_crt: bool,
+
         /// Specify new project's containment directory, default to current directory.
         #[arg(long)]
         root_dir: Option<PathBuf>,
@@ -75,6 +80,10 @@ enum Commands {
         /// Build with release profile, default to debug.
         #[arg(long, default_value_t = false)]
         release: bool,
+
+        /// Verbose build output
+        #[arg(short, long, default_value_t = false)]
+        verbose: bool,
 
         /// Target platform.
         #[clap(value_enum, default_value_t = BuildPlatform::Windows)]
@@ -176,17 +185,17 @@ fn main() -> anyhow::Result<()> {
             let key = key.unwrap_or_else(|| git_half_hash(&source_dir).unwrap_or(String::from("unknown")));
             kwui_cli::template_release::package(&source_dir, &key)?;
         }
-        Commands::New { with_kwui, root_dir, project_name } => {
+        Commands::New { with_kwui, static_crt, root_dir, project_name } => {
             let output_dir = root_dir
                 .unwrap_or_else(|| std::env::current_dir().unwrap())
                 .join(&project_name);
-            kwui_cli::new::new_project(with_kwui, &output_dir, "app", &project_name)?;
+            kwui_cli::new::new_project(with_kwui, static_crt, &output_dir, "app", &project_name)?;
         }
-        Commands::Build { release, platform } => {
+        Commands::Build { release, verbose, platform } => {
             let project_dir = std::env::current_dir()?;
             match platform {
-                BuildPlatform::Windows => kwui_cli::build::build_windows(&project_dir, release)?,
-                BuildPlatform::Apk => kwui_cli::build::build_apk(&project_dir, release)?,
+                BuildPlatform::Windows => kwui_cli::build::build_windows(&project_dir, verbose, release)?,
+                BuildPlatform::Apk => kwui_cli::build::build_apk(&project_dir, verbose, release)?,
             }
         }
     }

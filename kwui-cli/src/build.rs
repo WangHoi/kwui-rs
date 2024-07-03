@@ -3,7 +3,7 @@ use anyhow;
 use std::process::{Command, Stdio};
 use cargo_toml::Manifest;
 
-pub fn build_windows(project_dir: &PathBuf, release: bool) ->anyhow::Result<()> {
+pub fn build_windows(project_dir: &PathBuf, verbose: bool, release: bool) ->anyhow::Result<()> {
     let profile = if release {
         "release"
     } else {
@@ -12,7 +12,10 @@ pub fn build_windows(project_dir: &PathBuf, release: bool) ->anyhow::Result<()> 
     println!("BUILDING windows {} executable ...", profile);
     let mut args = vec!["build"];
     if release {
-        args.extend(["--release"])
+        args.extend(["--release"]);
+    }
+    if verbose {
+        args.extend(["-vv"]);
     }
     Command::new("cargo")
         .args(args)
@@ -22,7 +25,7 @@ pub fn build_windows(project_dir: &PathBuf, release: bool) ->anyhow::Result<()> 
     Ok(())
 }
 
-pub fn build_apk(project_dir: &PathBuf, release: bool) ->anyhow::Result<()> {
+pub fn build_apk(project_dir: &PathBuf, verbose: bool, release: bool) ->anyhow::Result<()> {
     let profile = if release {
         "release"
     } else {
@@ -31,7 +34,10 @@ pub fn build_apk(project_dir: &PathBuf, release: bool) ->anyhow::Result<()> {
     println!("BUILDING android {} apk ...", profile);
     let mut cargo_args = vec!["build", "--target", "aarch64-linux-android"];
     if release {
-        cargo_args.extend(["--release"])
+        cargo_args.extend(["--release"]);
+    }
+    if verbose {
+        cargo_args.extend(["-vv"]);
     }
     Command::new("cargo")
         .current_dir(project_dir)

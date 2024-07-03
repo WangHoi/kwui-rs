@@ -12,11 +12,11 @@ name = "@ANDROID_PACKAGE_NAME@_runner"
 path = "src/main.rs"
 
 [dependencies]
-kwui = "@KWUI_TEMPLATES_TAG@"
-kwui-sys = "@KWUI_TEMPLATES_TAG@"
+kwui = @KWUI_RS_DEP@
+kwui-sys = @KWUI_SYS_DEP@
 windows_dpi = "0.3.0"
 
 [build-dependencies]
 build-target = "0.4.0"
 embed-resource = "2.4.2"
-kwui-cli = "@KWUI_TEMPLATES_TAG@"
+kwui-cli = @KWUI_CLI_DEP@

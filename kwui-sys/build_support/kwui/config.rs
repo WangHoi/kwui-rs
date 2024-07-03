@@ -288,6 +288,7 @@ pub fn build(
             .profile("RelWithDebInfo")
             // .define("CMAKE_CONFIGURATION_TYPES", "Release")
             .define("CRT_STATIC", if cargo::target_crt_static() { "ON" } else { "OFF" })
+            .define("BUILD_SHARED_LIBS", if cargo::target_crt_static() { "OFF" } else { "ON" })
             .define("BUILD_TESTS", "OFF")
             .generator("Ninja")
             .build();
