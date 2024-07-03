@@ -31,6 +31,10 @@ pub fn new_project(with_kwui: Option<PathBuf>, static_crt: bool, output_dir: &Pa
 
     apply_template(output_dir, prj_type, crate_name, with_kwui, enable_android)?;
 
+    if static_crt {
+        make_static_crt_config(output_dir)?;
+    }
+
     if enable_android {
         android_copy_sdk_licenses(output_dir)?;
         android_copy_cxx_stl_library(output_dir)?;
@@ -96,6 +100,19 @@ fn kwui_dirs(tag: &str, with_kwui: Option<PathBuf>) -> (String, String, String) 
         let version = format!("\"{}\"", tag);
         (version.clone(), version.clone(), version)
     }
+}
+
+fn make_static_crt_config(output_dir: &PathBuf) -> anyhow::Result<()> {
+    let dot_cargo_dir = output_dir.join(".cargo");
+    fs::create_dir_all(&dot_cargo_dir)?;
+    let mut file = fs::File::create(dot_cargo_dir.join("config.toml"))?;
+    file.write_all(b"[target.x86_64-pc-windows-msvc]\n\
+rustflags = [\"-C\", \"target-feature=+crt-static\"]\n\
+\n\
+[target.i686-pc-windows-msvc]\n\
+rustflags = [\"-C\", \"target-feature=+crt-static\"]\n\
+\n")?;
+    Ok(())
 }
 
 fn configure_file(filename: &Path, content: String, crate_name: &str, crate_version: &str,
